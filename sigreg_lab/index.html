@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIGReg Lab — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Interactive sliced Epps-Pulley regularizer: directions, projections, characteristic functions, quadrature and gradients."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>SIGReg Lab</h1>
+          <p>
+            The LeJEPA regularizer in one screen. Draw a batch of 2-D embeddings, project it
+            onto random directions, and watch the sliced Epps–Pulley statistic push the cloud
+            toward an isotropic Gaussian.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Distribution</h2>
+            <div class="control">
+              <label for="preset">Preset</label>
+              <select id="preset">
+                <option value="gaussian">Standard Gaussian</option>
+                <option value="collapsed">Collapsed</option>
+                <option value="anisotropic">Anisotropic</option>
+                <option value="shifted">Shifted</option>
+                <option value="two_clusters">Two clusters</option>
+                <option value="heavy_tails">Heavy tails</option>
+                <option value="uniform">Uniform</option>
+                <option value="custom">Custom (Gaussian)</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="nPoints">Samples <span class="muted">N</span></label>
+              <input id="nPoints" type="range" min="16" max="512" step="8" value="256" />
+              <output id="nPointsOut">256</output>
+            </div>
+            <div class="control">
+              <label for="stdX">std x</label>
+              <input id="stdX" type="range" min="0.02" max="3" step="0.01" value="1" />
+              <output id="stdXOut">1.00</output>
+            </div>
+            <div class="control">
+              <label for="stdY">std y</label>
+              <input id="stdY" type="range" min="0.02" max="3" step="0.01" value="1" />
+              <output id="stdYOut">1.00</output>
+            </div>
+            <div class="control">
+              <label for="corr">correlation ρ</label>
+              <input id="corr" type="range" min="-0.95" max="0.95" step="0.01" value="0" />
+              <output id="corrOut">0.00</output>
+            </div>
+            <div class="control">
+              <label for="offsetX">mean x</label>
+              <input id="offsetX" type="range" min="-3" max="3" step="0.05" value="0" />
+              <output id="offsetXOut">0.00</output>
+            </div>
+            <div class="control">
+              <label for="offsetY">mean y</label>
+              <input id="offsetY" type="range" min="-3" max="3" step="0.05" value="0" />
+              <output id="offsetYOut">0.00</output>
+            </div>
+            <div class="control">
+              <label for="seed">sample seed</label>
+              <input id="seed" type="number" min="0" max="999999" step="1" value="7" />
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="newSample" type="button">New sample</button>
+              <button class="btn" id="reset" type="button">Reset</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>SIGReg settings</h2>
+            <div class="control">
+              <label for="slices">directions <span class="muted">S</span></label>
+              <input id="slices" type="range" min="8" max="512" step="8" value="64" />
+              <output id="slicesOut">64</output>
+            </div>
+            <div class="control">
+              <label for="knots">quadrature knots</label>
+              <select id="knots">
+                <option value="5">5</option>
+                <option value="9">9</option>
+                <option value="17" selected>17 (default)</option>
+                <option value="33">33</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="tMax">t<sub>max</sub></label>
+              <input id="tMax" type="range" min="1" max="5" step="0.5" value="3" />
+              <output id="tMaxOut">3.0</output>
+            </div>
+            <div class="control">
+              <label for="selectedSlice">selected slice</label>
+              <input id="selectedSlice" type="range" min="0" max="63" step="1" value="0" />
+              <output id="selectedSliceOut">0</output>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="resampleDirs" type="button">
+                Resample directions
+              </button>
+            </div>
+            <label class="check">
+              <input id="showGrad" type="checkbox" checked />
+              show −∂L/∂z arrows
+            </label>
+            <label class="check">
+              <input id="showDirections" type="checkbox" checked />
+              show direction fan
+            </label>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              SIGReg samples directions <span class="mono">a_s</span> on the unit circle,
+              projects every point <span class="mono">x<sub>j</sub></span> to
+              <span class="mono">t·(a_s·x<sub>j</sub>)</span>, and compares the empirical
+              characteristic function with the Gaussian one.
+            </p>
+            <div class="formula">T_s = N · Σ_t [(C(t) − φ₀(t))² + S(t)²] · w(t)
+L_SIGReg = mean_s T_s
+φ₀(t) = exp(−t²/2),  w(t) = exp(−t²/2)</div>
+            <p class="small muted" style="margin-top: 8px">
+              The quadrature is one-sided on <span class="mono">[0, t_max]</span>, with doubled
+              interior weights. A Gaussian batch has expected
+              <span class="mono">L_SIGReg ≈ 1.05</span> for this grid, not 0.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Headline numbers">
+            <div class="stat accent">
+              <span class="k">L_SIGReg</span>
+              <span class="v" id="statSig">–</span>
+              <span class="s" id="statSigSub">mean over slices</span>
+            </div>
+            <div class="stat good">
+              <span class="k">Gaussian null</span>
+              <span class="v" id="statNull">–</span>
+              <span class="s">expected per slice; a batch scatters</span>
+            </div>
+            <div class="stat" id="statRatioCard">
+              <span class="k">ratio</span>
+              <span class="v" id="statRatio">–</span>
+              <span class="s">L_SIGReg / null</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">selected slice T_s</span>
+              <span class="v" id="statSlice">–</span>
+              <span class="s" id="statSliceSub">slice 0</span>
+            </div>
+            <div class="stat">
+              <span class="k">batch</span>
+              <span class="v" id="statBatch">–</span>
+              <span class="s" id="statBatchSub">N points · S directions</span>
+            </div>
+          </section>
+
+          <div class="plot-grid">
+            <section class="plot-card">
+              <h3>Embedding cloud and regularizer force</h3>
+              <p class="hint">
+                Points are the batch. Arrows show <span class="mono">−∂L/∂z</span>; the faint
+                fan is the sampled direction set.
+              </p>
+              <div class="canvas-wrap square">
+                <canvas id="cloudCanvas" aria-label="2-D embedding cloud"></canvas>
+              </div>
+              <div class="legend">
+                <span><span class="swatch" style="background:#2458d6"></span>embedding</span>
+                <span><span class="swatch line" style="background:#b42318"></span>−gradient</span>
+                <span><span class="swatch line" style="background:#9db7f3"></span>directions</span>
+              </div>
+            </section>
+
+            <section class="plot-card">
+              <h3>1-D projections</h3>
+              <p class="hint">
+                Three random slices, compared with <span class="mono">N(0,1)</span>. Move the
+                selected-slice slider to inspect others.
+              </p>
+              <div class="canvas-wrap square">
+                <canvas id="histCanvas" aria-label="Projection histograms"></canvas>
+              </div>
+              <div class="legend" id="histLegend"></div>
+            </section>
+
+            <section class="plot-card">
+              <h3>Characteristic functions</h3>
+              <p class="hint">
+                <span class="mono">C(t)</span> should follow
+                <span class="mono">φ₀(t)</span>; <span class="mono">S(t)</span> should stay
+                near zero.
+              </p>
+              <div class="canvas-wrap tall">
+                <canvas id="cfCanvas" aria-label="Characteristic function plot"></canvas>
+              </div>
+              <div class="legend">
+                <span><span class="swatch line" style="background:#2458d6"></span>C(t) model</span>
+                <span><span class="swatch line" style="background:#c2610a"></span>S(t) model</span>
+                <span><span class="swatch line" style="background:#18202a"></span>φ₀(t) target</span>
+              </div>
+            </section>
+
+            <section class="plot-card">
+              <h3>Integrand and quadrature</h3>
+              <p class="hint">
+                The shaded area is the integrand times the window. Vertical ticks are the
+                quadrature nodes used by <span class="mono">T_s</span>.
+              </p>
+              <div class="canvas-wrap tall">
+                <canvas id="integrandCanvas" aria-label="SIGReg integrand"></canvas>
+              </div>
+              <div class="legend">
+                <span><span class="swatch" style="background:rgba(36,88,214,0.25)"></span>err(t)·φ₀(t)</span>
+                <span><span class="swatch line" style="background:#2458d6"></span>integrand</span>
+                <span><span class="swatch line" style="background:#8a95a3"></span>nodes</span>
+              </div>
+            </section>
+
+            <section class="plot-card wide">
+              <h3>Per-slice statistic T_s</h3>
+              <p class="hint">
+                Each direction gives its own statistic. The mean is
+                <span class="mono">L_SIGReg</span>; the horizontal line is the Gaussian null
+                expectation for this quadrature.
+              </p>
+              <div class="canvas-wrap wide">
+                <canvas id="sliceCanvas" aria-label="Per-slice SIGReg statistic"></canvas>
+              </div>
+              <div class="legend">
+                <span><span class="swatch line" style="background:#2458d6"></span>T_s per slice</span>
+                <span><span class="swatch line" style="background:#16794a"></span>mean</span>
+                <span><span class="swatch line" style="background:#c2610a"></span>Gaussian null</span>
+              </div>
+            </section>
+          </div>
+
+          <section class="card">
+            <h2>Example values for the selected slice</h2>
+            <p>
+              This is the actual quadrature table. <span class="mono">err</span> is
+              <span class="mono">(C−φ₀)² + S²</span>; the last column is
+              <span class="mono">N · err · weight</span>. Summing the last column gives
+              <span class="mono">T_s</span>.
+            </p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>t</th>
+                    <th>C(t)</th>
+                    <th>S(t)</th>
+                    <th>φ₀(t)</th>
+                    <th>err(t)</th>
+                    <th>weight</th>
+                    <th>N·err·w</th>
+                  </tr>
+                </thead>
+                <tbody id="sliceTableBody"></tbody>
+              </table>
+            </div>
+            <details>
+              <summary>How to read this table</summary>
+              <p class="small muted">
+                At small <span class="mono">t</span> the statistic is sensitive to mean and
+                scale; at larger <span class="mono">t</span> it is sensitive to shape. The
+                weight already contains the Gaussian window and the trapezoid spacing, so the
+                last column is directly summable. The same formula appears in
+                <span class="mono">pysrc/lejepa/sigreg.py</span>.
+              </p>
+            </details>
+          </section>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>Try this</h2>
+              <p>
+                <strong>1. Collapse it.</strong> Choose the “Collapsed” preset. The cloud shrinks
+                and <span class="mono">L_SIGReg</span> rises far above the null. The arrows point
+                outward.
+              </p>
+              <p>
+                <strong>2. Stretch it.</strong> Set <span class="mono">std x = 2.5</span> and
+                <span class="mono">std y = 0.25</span>. The marginal along x is too wide, along y
+                too narrow; both contribute.
+              </p>
+              <p>
+                <strong>3. Shift it.</strong> Keep the shape Gaussian but move the mean. SIGReg
+                is not mean-invariant, because the target is <span class="mono">N(0,1)</span>,
+                not a standardized Gaussian.
+              </p>
+              <p>
+                <strong>4. Resample directions.</strong> The value moves. With few slices the
+                estimator is noisy; this is why the paper resamples every step. Even a true
+                Gaussian batch scatters: at <span class="mono">N = 256</span>,
+                <span class="mono">K = 2</span>, <span class="mono">S = 64</span> the 5–95%
+                range is roughly <span class="mono">0.4 … 2.2</span> around the
+                <span class="mono">1.05</span> null. Judge a cloud against that spread, not
+                against a single number.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Why this matters for LeJEPA</h2>
+              <p>
+                The prediction term alone can be driven to zero by making all embeddings equal.
+                SIGReg makes that collapsed cloud expensive: its 1-D projections are a spike at
+                zero, while the target is a standard normal.
+              </p>
+              <p>
+                In the real model SIGReg is computed once on a
+                <span class="mono">(V, N, K)</span> tensor, so every view shares the same
+                directions. The slice count and <span class="mono">t_max</span> are config
+                values, not constants.
+              </p>
+              <div class="note">
+                A value near <span class="mono">1.05</span> is the Gaussian expectation for this
+                quadrature, not a perfect zero. The trained CIFAR run reported
+                <span class="mono">L_sig ≈ 2.47</span>, which is above the null but far below a
+                collapsed cloud.
+              </div>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Exact conventions: one-sided quadrature on <span class="mono">[0, t_max]</span>,
+            <span class="mono">n_knots</span> odd, endpoint weights
+            <span class="mono">dt</span>, interior <span class="mono">2·dt</span>, times
+            <span class="mono">exp(−t²/2)</span>. Reference:
+            <span class="mono">pysrc/lejepa/sigreg.py</span> · protocol section 5.2.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/sigreg_core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

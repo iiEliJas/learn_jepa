@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LeJEPA Loss Calculator — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Interactive LeJEPA loss: edit a tiny embedding tensor and see the prediction term, SIGReg and lambda trade-off."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>LeJEPA Loss Calculator</h1>
+          <p>
+            A tiny <span class="mono">(V, N, K)</span> batch you can edit by hand. Watch the
+            prediction term, the SIGReg term and the weighted total change as you move views,
+            dimensions and <span class="mono">lambda</span>.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Preset</h2>
+            <div class="control">
+              <label for="preset">Batch shape</label>
+              <select id="preset">
+                <option value="near_invariant">Near-invariant, diverse (default)</option>
+                <option value="invariant_diverse">Perfectly identical views</option>
+                <option value="collapsed">Collapsed</option>
+                <option value="noisy">Noisy views</option>
+                <option value="outlier">One outlier</option>
+                <option value="non_gaussian">Non-Gaussian</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="randomize" type="button">Randomize z</button>
+              <button class="btn" id="reset" type="button">Reset</button>
+            </div>
+            <p class="small muted" style="margin-top: 10px">
+              Editing a cell switches the preset to “Custom”; the numbers are the input, not a
+              fixed formula.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Shape</h2>
+            <div class="control">
+              <label for="views">views <span class="mono">V</span></label>
+              <input id="views" type="range" min="2" max="6" step="1" value="4" />
+              <output id="viewsOut">4</output>
+            </div>
+            <div class="control">
+              <label for="samples">samples <span class="mono">N</span></label>
+              <input id="samples" type="range" min="2" max="8" step="1" value="6" />
+              <output id="samplesOut">6</output>
+            </div>
+            <div class="control">
+              <label for="dim">embedding dim <span class="mono">K</span></label>
+              <select id="dim">
+                <option value="2" selected>2 (plottable)</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="globalViews">global views <span class="mono">V_g</span></label>
+              <input id="globalViews" type="range" min="1" max="4" step="1" value="4" />
+              <output id="globalViewsOut">4</output>
+            </div>
+            <div class="control">
+              <label for="lambda">lambda λ</label>
+              <input id="lambda" type="range" min="0" max="0.2" step="0.005" value="0.02" />
+              <output id="lambdaOut">0.020</output>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>SIGReg estimator</h2>
+            <div class="control">
+              <label for="slices">directions <span class="mono">S</span></label>
+              <select id="slices">
+                <option value="32">32</option>
+                <option value="64" selected>64</option>
+                <option value="128">128</option>
+                <option value="256">256</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="mode">mode</label>
+              <select id="mode">
+                <option value="per_view" selected>per view (paper)</option>
+                <option value="joint">joint (stable_pretraining)</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="reduction">L_pred reduction</label>
+              <select id="reduction">
+                <option value="mean_over_k" selected>mean over K</option>
+                <option value="sum_over_k">sum over K</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="seed">direction seed</label>
+              <input id="seed" type="number" min="0" max="999999" step="1" value="1234" />
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="resample" type="button">Resample directions</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>What is happening?</h2>
+            <p>
+              <span class="mono">μ</span> is the mean of the first
+              <span class="mono">V_g</span> views. The prediction loss is the mean squared
+              distance from every view to <span class="mono">μ</span>. SIGReg tests each view
+              against <span class="mono">N(0, I)</span>.
+            </p>
+            <div class="formula">μ[n] = mean_{v &lt; V_g} z[v,n]
+L_pred = mean_{v,n,k} (μ[n,k] − z[v,n,k])²
+L = (1−λ)·L_pred + λ·L_SIGReg</div>
+            <p class="small muted" style="margin-top: 8px">
+              The paper and the official minimal example use
+              <span class="mono">mean_over_k</span>, not a sum over coordinates. Switching to
+              <span class="mono">sum_over_k</span> multiplies <span class="mono">L_pred</span>
+              by <span class="mono">K</span> and silently changes the effective
+              <span class="mono">lambda</span>.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Headline numbers">
+            <div class="stat accent">
+              <span class="k">L_pred</span>
+              <span class="v" id="statPred">–</span>
+              <span class="s" id="statPredSub">mean over V·N·K</span>
+            </div>
+            <div class="stat good">
+              <span class="k">L_SIGReg</span>
+              <span class="v" id="statSig">–</span>
+              <span class="s" id="statSigSub">mean over views</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">total loss</span>
+              <span class="v" id="statLoss">–</span>
+              <span class="s" id="statLossSub">λ = 0.020</span>
+            </div>
+            <div class="stat">
+              <span class="k">SIGReg share</span>
+              <span class="v" id="statShare">–</span>
+              <span class="s">λ·L_sig / L</span>
+            </div>
+            <div class="stat">
+              <span class="k">per-view range</span>
+              <span class="v" id="statRange">–</span>
+              <span class="s" id="statRangeSub">min … max</span>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Edit the batch z</h2>
+            <p>
+              Rows are views, columns are samples; each cell holds the
+              <span class="mono">K</span> coordinates in order (z₀, z₁, …). In the plot, the
+              first two coordinates are shown (K=3 uses z₀ and z₁).
+            </p>
+            <div class="matrix" id="matrix"></div>
+            <div class="legend" style="margin-top: 8px">
+              <span><span class="swatch" style="background:#2458d6"></span>view 0</span>
+              <span><span class="swatch" style="background:#0f766e"></span>view 1</span>
+              <span><span class="swatch" style="background:#c2610a"></span>view 2</span>
+              <span><span class="swatch" style="background:#b42318"></span>view 3+</span>
+              <span><span class="swatch" style="background:#18202a"></span>μ</span>
+            </div>
+          </section>
+
+          <div class="plot-grid">
+            <section class="plot-card">
+              <h3>Views, mean and prediction arrows</h3>
+              <p class="hint">
+                Same-colour points are views of the same sample. Arrows point from each view to
+                <span class="mono">μ</span>; their squared length is the prediction error.
+              </p>
+              <div class="canvas-wrap square">
+                <canvas id="scatterCanvas" aria-label="Tiny embedding scatter"></canvas>
+              </div>
+            </section>
+
+            <section class="plot-card">
+              <h3>Loss terms</h3>
+              <p class="hint">
+                The weighted split changes with <span class="mono">lambda</span>. The raw terms
+                are shown below.
+              </p>
+              <div style="padding: 8px 4px 2px">
+                <div class="bar-row">
+                  <span>(1−λ)·L_pred</span>
+                  <div class="bar-track"><div class="bar-fill" id="barPred" style="width:0%"></div></div>
+                  <span class="num" id="barPredNum">–</span>
+                </div>
+                <div class="bar-row">
+                  <span>λ·L_SIGReg</span>
+                  <div class="bar-track"><div class="bar-fill teal" id="barSig" style="width:0%"></div></div>
+                  <span class="num" id="barSigNum">–</span>
+                </div>
+                <hr class="soft" />
+                <div class="bar-row">
+                  <span>L_pred raw</span>
+                  <div class="bar-track"><div class="bar-fill orange" id="barPredRaw" style="width:0%"></div></div>
+                  <span class="num" id="barPredRawNum">–</span>
+                </div>
+                <div class="bar-row">
+                  <span>L_sig raw</span>
+                  <div class="bar-track"><div class="bar-fill red" id="barSigRaw" style="width:0%"></div></div>
+                  <span class="num" id="barSigRawNum">–</span>
+                </div>
+              </div>
+              <div class="note" id="balanceNote" style="margin-top: 10px">
+                The balance note appears here.
+              </div>
+            </section>
+          </div>
+
+          <section class="card">
+            <h2>Step by step</h2>
+            <div class="formula" id="stepByStep"></div>
+            <details>
+              <summary>What each symbol means</summary>
+              <p class="small muted">
+                <span class="mono">V</span> views per image, <span class="mono">N</span> images
+                (samples), <span class="mono">K</span> projector dimensions,
+                <span class="mono">V_g</span> global views used for the target mean.
+                The official small-scale recipe uses <span class="mono">V=4, V_g=4</span>; the
+                large-scale recipe uses <span class="mono">V_g=2</span> global views plus local
+                views.
+              </p>
+            </details>
+          </section>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>Per-view SIGReg</h2>
+              <p>
+                In <span class="mono">per_view</span> mode each view is tested over its
+                <span class="mono">N</span> samples, then the values are averaged. In
+                <span class="mono">joint</span> mode all <span class="mono">V·N</span> points go
+                through one test.
+              </p>
+              <div id="perViewBars"></div>
+              <p class="small muted" id="sigregNoise" style="margin-top: 10px"></p>
+            </div>
+
+            <div class="card">
+              <h2>Try this</h2>
+              <p>
+                <strong>1. Collapse.</strong> Use the “Collapsed” preset. Every view is
+                identical, so <span class="mono">L_pred = 0</span>, but
+                <span class="mono">L_SIGReg</span> is large.
+              </p>
+              <p>
+                <strong>2. Make views noisy.</strong> Use “Noisy views”. The prediction term
+                rises; SIGReg may fall because the marginal cloud is wider.
+              </p>
+              <p>
+                <strong>3. Move lambda.</strong> Drag it to 0 and then 0.2. At
+                <span class="mono">λ=0</span> the total is pure prediction; at
+                <span class="mono">λ=0.2</span> the regularizer dominates.
+              </p>
+              <p>
+                <strong>4. Change V_g.</strong> With <span class="mono">V_g &lt; V</span> the
+                target mean ignores the local views, but they still contribute to
+                <span class="mono">L_pred</span> and SIGReg.
+              </p>
+              <p>
+                <strong>5. Switch reduction.</strong> Compare mean-over-K and sum-over-K. The
+                loss changes by a factor of <span class="mono">K</span>; that is why lambda
+                values are not portable between conventions.
+              </p>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Reference: <span class="mono">pysrc/lejepa/loss.py</span> and protocol section 5.1.
+            SIGReg uses the same one-sided 17-knot quadrature as
+            <span class="mono">pysrc/lejepa/sigreg.py</span>.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/sigreg_core.js"></script>
+    <script src="loss_core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Interactive demos for understanding JEPA, LeJEPA, SIGReg and the CIFAR-10 representation."
+    />
+    <link rel="stylesheet" href="assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <span class="eyebrow">FastJEPA · learning tools</span>
+        <h1>Learn LeJEPA by playing with it.</h1>
+        <p>
+          Static, dependency-free demos that turn the equations and the training logs into
+          things you can drag, click, and inspect. Start with the objective, then look at where
+          the trained CIFAR-10 model puts its embeddings.
+        </p>
+      </header>
+
+      <section class="card" style="margin-top: 4px">
+        <h2>Suggested path</h2>
+        <div class="path">
+          <a href="loss_calculator/index.html">
+            1. The loss, by hand
+            <span>Edit a tiny z tensor and see L_pred, L_SIGReg and lambda.</span>
+          </a>
+          <a href="sigreg_lab/index.html">
+            2. SIGReg, visually
+            <span>Directions, projections, characteristic functions and the push outward.</span>
+          </a>
+          <a href="#coming-soon">
+            3. The CIFAR embedding atlas
+            <span>Click a test image and see its neighbours and augmented views.</span>
+          </a>
+          <a href="#coming-soon">
+            4. Inside the ViT
+            <span>Forward-pass values, patch norms and attention maps.</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="card-grid" aria-label="Available demos">
+        <a class="demo-card" href="sigreg_lab/index.html">
+          <span class="tag">available · no checkpoint</span>
+          <h2>SIGReg Lab</h2>
+          <p>
+            Draw a 2-D embedding cloud, project it onto random directions, and watch the sliced
+            Epps–Pulley statistic compare it with <span class="mono">N(0, I)</span>. Includes the
+            quadrature table, per-slice values and the gradient force.
+          </p>
+          <span class="go">Open the lab →</span>
+        </a>
+
+        <a class="demo-card" href="loss_calculator/index.html">
+          <span class="tag">available · no checkpoint</span>
+          <h2>LeJEPA Loss Calculator</h2>
+          <p>
+            A tiny <span class="mono">(V, N, K)</span> batch you can edit. See the global-view
+            mean, the prediction error arrows, per-view SIGReg, and the effect of
+            <span class="mono">lambda</span> and the mean-vs-sum convention.
+          </p>
+          <span class="go">Open the calculator →</span>
+        </a>
+
+        <a class="demo-card" href="#coming-soon">
+          <span class="tag soon">coming next · needs checkpoint</span>
+          <h2>CIFAR Embedding Atlas</h2>
+          <p>
+            A clickable 2-D map of the test set with encoder/projector toggles, nearest
+            neighbours, misclassified-only views and a confusion-cell drill-down. This is the
+            “where does the model put this image?” demo.
+          </p>
+          <span class="go">See the plan →</span>
+        </a>
+
+        <a class="demo-card" href="#coming-soon">
+          <span class="tag soon">coming next · needs checkpoint</span>
+          <h2>Per-Image Embedding Card</h2>
+          <p>
+            One image, four augmented views, their points, the mean <span class="mono">μ</span>,
+            pairwise cosine and the prediction-loss contribution. Compare two images side by
+            side.
+          </p>
+          <span class="go">See the plan →</span>
+        </a>
+      </section>
+
+      <section class="card" id="coming-soon" style="margin-top: 18px">
+        <h2>What is next</h2>
+        <div class="three-col">
+          <div>
+            <h3>Needs the CIFAR checkpoint</h3>
+            <p class="small muted">
+              The atlas, per-image card, three-space lens, real-data SIGReg inspector, 16-D
+              inspector, forward-pass x-ray, attention explorer and augmentation playground all
+              share a compact model/asset export. The local plan is in
+              <span class="mono">learning_tools.md</span>.
+            </p>
+          </div>
+          <div>
+            <h3>No checkpoint needed</h3>
+            <p class="small muted">
+              The collapse simulator, a guided tour of JEPA itself, and a run comparator can be
+              built with the existing logs and a tiny CPU training loop.
+            </p>
+          </div>
+          <div>
+            <h3>How the static pages work</h3>
+            <p class="small muted">
+              Open <span class="mono">index.html</span> directly, or serve this folder with
+              <span class="mono">python -m http.server</span>. No CDN, no build step, no runtime
+              server. The math is the same as <span class="mono">pysrc/lejepa/sigreg.py</span>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px">
+        <h2>Why this exists</h2>
+        <p>
+          The experiment reports already have good static figures, but a static PCA plot cannot
+          answer “which image is this point?” or “what happens if I make the cloud narrower?”.
+          These pages are the interactive layer around the PyTorch ground truth: every panel
+          shows the formula, the current numbers, and a control that changes them.
+        </p>
+        <p>
+          The training code, the C/CUDA kernels, the protocol and the benchmark numbers live in
+          <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a>. This repository only
+          turns that work into learning material.
+        </p>
+        <div class="note">
+          The demos are learning material, not benchmarks. The trained-checkpoint numbers in the
+          experiment log remain the source of truth for claims about the model.
+        </div>
+      </section>
+
+      <footer class="footer">
+        Part of the <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> project ·
+        Apache-2.0 · see <a href="learning_tools.md">learning_tools.md</a> for the full roadmap
+        and
+        <a href="https://github.com/iiEliJas/fast_JEPA/blob/main/docs/experiments/002_cifar10_lejepa_analysis.md"
+          >the first CIFAR-10 analysis</a
+        >.
+      </footer>
+    </div>
+  </body>
+</html>
