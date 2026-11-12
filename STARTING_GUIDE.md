@@ -67,6 +67,22 @@ sha256sum -c /tmp/SHA256SUMS
 
 On macOS use `shasum -a 256 -c /tmp/SHA256SUMS` if `sha256sum` is unavailable.
 
+If the repository is still private, release downloads require authentication.
+Use the GitHub CLI instead of `curl`:
+
+```bash
+gh release download v0.1.0 --repo iiEliJas/learn_jepa \
+  --pattern 'cifar10_lejepa_400ep_model.pt' \
+  --pattern 'SHA256SUMS' \
+  --dir checkpoints/cifar_400epochs
+
+cd checkpoints/cifar_400epochs
+sha256sum -c SHA256SUMS
+```
+
+Once the repository is public, the direct `curl` URLs above work without
+authentication.
+
 ### What is inside the asset
 
 The asset is a **model-only** checkpoint. The full training checkpoint also
