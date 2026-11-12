@@ -241,6 +241,43 @@
     return matches / indices.length;
   }
 
+  function meanNeighborScore(neighbors) {
+    if (!neighbors || neighbors.length === 0) return 0;
+    let total = 0;
+    for (const neighbor of neighbors) total += neighbor.score;
+    return total / neighbors.length;
+  }
+
+  /* Jaccard similarity for two neighbour-id lists. */
+  function jaccard(a, b) {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    if (setA.size === 0 && setB.size === 0) return 1;
+    let shared = 0;
+    for (const value of setA) if (setB.has(value)) shared += 1;
+    const union = setA.size + setB.size - shared;
+    return union > 0 ? shared / union : 1;
+  }
+
+  /* Majority label among neighbours; ties go to the lower class index. */
+  function neighborVote(neighbors, labels) {
+    const counts = new Map();
+    for (const neighbor of neighbors) {
+      const label = labels[neighbor.index];
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    let label = null;
+    let count = 0;
+    for (const [candidate, tally] of counts) {
+      if (tally > count || (tally === count && candidate < label)) {
+        label = candidate;
+        count = tally;
+      }
+    }
+    const total = neighbors ? neighbors.length : 0;
+    return { label, count, fraction: total > 0 ? count / total : 0 };
+  }
+
   function accuracy(labels, preds) {
     const count = Math.min(labels.length, preds.length);
     if (count === 0) return 0;
@@ -279,6 +316,9 @@
     pairwiseCosine,
     confusionMatrix,
     classPurity,
+    meanNeighborScore,
+    jaccard,
+    neighborVote,
     accuracy,
     quantile,
   };

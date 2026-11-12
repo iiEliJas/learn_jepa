@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three-Space Lens — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="One CIFAR-10 image shown through the raw ViT CLS feature, the 512-d proj_head and the 16-d LeJEPA projector, with nearest neighbours, class purity and cross-space overlap."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>Three-Space Lens</h1>
+          <p>
+            Follow one test image through the model. The same image and the same
+            neighbourhood are shown in the raw ViT CLS feature, the 512-d
+            <span class="mono">proj_head</span> and the 16-d projector. Compare what
+            “near” means in each space.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Pick an image</h2>
+            <div class="control">
+              <label for="classPick">class</label>
+              <select id="classPick"></select>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="prevPick" type="button">← prev</button>
+              <button class="btn" id="nextPick" type="button">next →</button>
+              <button class="btn" id="randomPick" type="button">random</button>
+            </div>
+            <div class="thumb-grid pick-grid" id="pickGrid"></div>
+            <p class="small muted" style="margin-top: 8px">
+              Click a thumbnail to point the lens at that image. The URL keeps the
+              selection, so you can share or reload it.
+            </p>
+            <div class="btn-row" style="margin-top: 8px">
+              <a class="btn" id="openAtlas" href="../cifar_atlas/index.html">Open in atlas →</a>
+              <a class="btn" id="openCard" href="../per_image/index.html">Open the view card →</a>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Lens settings</h2>
+            <div class="control">
+              <label>features</label>
+              <div class="segmented" id="centering">
+                <button type="button" data-centered="false">raw</button>
+                <button type="button" data-centered="true" aria-pressed="true">mean-centered</button>
+              </div>
+            </div>
+            <div class="control">
+              <label>neighbours</label>
+              <div class="segmented" id="kSelect">
+                <button type="button" data-k="5">5</button>
+                <button type="button" data-k="8" aria-pressed="true">8</button>
+                <button type="button" data-k="12">12</button>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="resetView" type="button">Reset lens</button>
+            </div>
+            <p class="small muted" style="margin-top: 8px">
+              Mean-centering subtracts the subset mean from every feature dimension
+              before the cosine comparison. It does not change the model; it changes
+              the question you ask of the representation.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              One dot is one image. Each of the three panels ranks the other 1,999
+              test images by cosine similarity in a different representation:
+            </p>
+            <div class="formula">
+              CLS      192-d encoder token, before proj_head
+              head     512-d proj_head, the probe feature
+              proj     16-d projector, L_pred + SIGReg
+              sim(a,b) = aᵀb / (‖a‖ ‖b‖)
+            </div>
+            <p class="small muted" style="margin-top: 8px">
+              The CLS and head features share a large common direction. Raw cosine is
+              high for almost every pair; centering removes that direction before
+              comparing. The projector has no such common direction, so it looks
+              diffuse in a different way: it spends its 16 dimensions on prediction
+              and regularisation, not on class separation.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Try this</h2>
+            <p>
+              <strong>1. Raw vs centered.</strong> Start with the head space and switch
+              to raw. The mean cosine jumps towards 1 and many neighbours look equally
+              close. Centring makes the ranking depend on the image, not the shared
+              offset.
+            </p>
+            <p>
+              <strong>2. Read the vote.</strong> Each panel takes a majority vote of its
+              <span class="mono">k</span> neighbours. Compare that vote with the probe's
+              prediction in the banner. A space can retrieve the right class without
+              being the space the classifier reads.
+            </p>
+            <p>
+              <strong>3. Look for overlap.</strong> The overlap matrix shows how much
+              the three neighbour lists agree. Shared neighbours are the images the
+              representation considers close for reasons that survive a change of
+              space.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Headline numbers">
+            <div class="stat accent">
+              <span class="k">true class</span>
+              <span class="v" id="statTrue">–</span>
+              <span class="s" id="statTrueSub">test subset</span>
+            </div>
+            <div class="stat good">
+              <span class="k">probe call</span>
+              <span class="v" id="statPred">–</span>
+              <span class="s" id="statPredSub">top-1 probability</span>
+            </div>
+            <div class="stat">
+              <span class="k">CLS purity</span>
+              <span class="v" id="statCls">–</span>
+              <span class="s" id="statClsSub">neighbours with the true label</span>
+            </div>
+            <div class="stat">
+              <span class="k">head purity</span>
+              <span class="v" id="statHead">–</span>
+              <span class="s" id="statHeadSub">neighbours with the true label</span>
+            </div>
+            <div class="stat">
+              <span class="k">projector purity</span>
+              <span class="v" id="statProj">–</span>
+              <span class="s" id="statProjSub">neighbours with the true label</span>
+            </div>
+          </section>
+
+          <section class="card selected-banner" id="selectedBanner"></section>
+
+          <section class="lens-grid" aria-label="Neighbours in three embedding spaces">
+            <section class="card space-card" id="spaceCardCls"></section>
+            <section class="card space-card" id="spaceCardHead"></section>
+            <section class="card space-card" id="spaceCardProj"></section>
+          </section>
+
+          <div class="two-col">
+            <section class="card">
+              <h2>Neighbour overlap</h2>
+              <p class="hint">
+                Jaccard similarity between the top-<span class="mono" id="overlapK">8</span>
+                neighbour lists. 100% means the two spaces retrieved exactly the same
+                images; 0% means they shared none.
+              </p>
+              <div id="overlapMatrix" class="lens-matrix" role="table"></div>
+              <p class="small muted" id="overlapNote"></p>
+            </section>
+
+            <section class="card">
+              <h2>Consensus neighbours</h2>
+              <p class="hint">
+                Images that appear in more than one neighbour list, ranked by how many
+                spaces retrieved them and then by their best rank.
+              </p>
+              <div id="consensusGrid" class="thumb-grid"></div>
+              <p class="small muted" id="consensusNote"></p>
+            </section>
+          </div>
+
+          <section class="card">
+            <h2>Space-by-space readout</h2>
+            <p class="hint">
+              Purity and mean cosine use the selected image and the current
+              <span class="mono">k</span>. The k-NN column is the whole-subset
+              leave-one-out score at <span class="mono">k = 20</span>, so it is a
+              stable reference rather than a property of this image.
+            </p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>space</th>
+                    <th>dim</th>
+                    <th>k-NN @ 20</th>
+                    <th>mean-direction ratio</th>
+                    <th>purity @ k</th>
+                    <th>mean cosine @ k</th>
+                    <th>neighbour vote</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonBody"></tbody>
+              </table>
+            </div>
+            <div class="note" id="verdictNote" style="margin-top: 10px"></div>
+          </section>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>Three spaces, three jobs</h2>
+              <p>
+                The <strong>CLS</strong> token is the encoder's output before the
+                projection head. It is the representation the ViT blocks actually
+                build, but no label ever touches it directly. The
+                <strong>512-d head</strong> is a linear map trained by the LeJEPA
+                objective; the probe reads it, so it is the most semantic of the
+                three. The <strong>16-d projector</strong> is the space where
+                <span class="mono">L_pred</span> and SIGReg are measured. It is small
+                on purpose: enough capacity to predict across views, little enough to
+                keep the sliced-Gaussian constraint meaningful.
+              </p>
+              <p class="small muted">
+                A space can be useful without being a classifier. The projector's job
+                is not to preserve class labels; it is to make views of the same image
+                agree while staying close to <span class="mono">N(0, I)</span> in every
+                random slice.
+              </p>
+            </div>
+            <div class="card">
+              <h2>How to read the numbers</h2>
+              <p>
+                <strong>Purity</strong> is the fraction of the
+                <span class="mono">k</span> neighbours whose true label matches the
+                query. <strong>Mean cosine</strong> is the average similarity of those
+                neighbours; it says how tight the neighbourhood is, not whether it is
+                correct. <strong>Vote</strong> is the majority label among the
+                neighbours, with ties going to the lower class index.
+              </p>
+              <p class="small muted">
+                Raw features have a higher mean cosine almost by construction, so
+                compare purity and vote before comparing similarity. The
+                mean-direction ratio in the table is the norm of the subset mean
+                divided by the mean row norm; near 1 means a dominant shared direction.
+              </p>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Embeddings come from
+            <span class="mono">checkpoints/cifar_400epochs/ckpt.pt</span>
+            (SHA-256 <span class="mono" id="footerSha">–</span>) at commit
+            <span class="mono" id="footerCommit">–</span>, exported in eval mode by
+            <span class="mono">cifar_atlas/generate.py</span>. Neighbour math:
+            <span class="mono">assets/atlas_core.js</span>. Reference:
+            <span class="mono">pysrc/lejepa/analysis.py</span> and protocol section
+            5.1.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/atlas_core.js"></script>
+    <script src="../assets/atlas_ui.js"></script>
+    <script src="../cifar_atlas/atlas_data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

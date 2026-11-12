@@ -7,10 +7,10 @@ interactive learning layer around the existing PyTorch ground truth: formulas,
 real numbers, and hands-on controls, not only static plots.
 
 Implementation status (2026-11-12): SIGReg Lab, LeJEPA Loss Calculator, CIFAR
-Embedding Atlas, Per-Image Embedding Card and the landing page are available.
-The atlas ships a balanced 2,000-image test subset from the 400-epoch CIFAR run;
-the checkpoint and raw CIFAR data remain local. The model-only checkpoint is
-published in the `v0.1.0` GitHub release.
+Embedding Atlas, Per-Image Embedding Card, Three-Space Lens and the landing page
+are available. The atlas ships a balanced 2,000-image test subset from the
+400-epoch CIFAR run; the checkpoint and raw CIFAR data remain local. The
+model-only checkpoint is published in the `v0.1.0` GitHub release.
 
 Existing material to build on:
 
@@ -164,16 +164,20 @@ prediction rather than classification.
 
 **Effort.** M.
 
-### 6. Three-Space Lens
+### 6. Three-Space Lens (available)
 
 **What you can do.** The same image and neighbourhood shown in three spaces:
-raw ViT CLS, 512-d head, 16-d projector. Side-by-side nearest neighbours,
-class purity, k-NN accuracy, cosine statistics.
+raw ViT CLS, 512-d head, 16-d projector. Side-by-side nearest neighbours, class
+purity, neighbour vote and mean cosine, plus a cross-space overlap matrix and a
+consensus strip of images retrieved by more than one space. Toggle raw vs
+mean-centered features and `k`; the selection is kept in the URL.
 
 **What it teaches.** Which space is semantic, which space is for
-prediction/SIGReg, and why the projector looks more diffuse.
+prediction/SIGReg, and why the projector looks more diffuse. The overlap matrix
+separates "same class" from "same neighbourhood": two spaces can agree on the
+label while retrieving different images.
 
-**Needs.** Checkpoint.
+**Needs.** The same export as the atlas. Runs on the included assets.
 
 **Effort.** S/M.
 
@@ -280,12 +284,13 @@ The first pass is implemented:
 2. LeJEPA Loss Calculator
 3. CIFAR Embedding Atlas
 4. Per-Image Embedding Card
-5. A tiny landing page (item 14)
+5. Three-Space Lens
+6. A tiny landing page (item 14)
 
-The atlas and per-image card share the export layer in
-`cifar_atlas/generate.py`; the landing page links the four demos. The next
-conceptual demo is the collapse simulator (item 3), followed by the
-three-space lens and the real-data SIGReg inspector.
+The atlas, per-image card and lens share the export layer in
+`cifar_atlas/generate.py`; the landing page links all five demos. The next
+conceptual demo is the collapse simulator (item 3), followed by the combined
+real-data SIGReg / 16-D inspector.
 
 ---
 
@@ -314,6 +319,9 @@ cifar_atlas/
 per_image/
   index.html
   app.js                     four views, local layout, L_pred
+space_lens/
+  index.html
+  app.js                     same image in CLS, head and projector space
 assets/
   atlas_core.js              pure decode/neighbour/prediction math
   atlas_ui.js                sprite and marker helpers

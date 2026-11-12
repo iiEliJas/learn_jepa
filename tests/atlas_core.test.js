@@ -122,3 +122,26 @@ test("meanDirectionRatio is one for a shared non-zero direction", () => {
   const centered = Core.centerRows(rows, 3, 2);
   assert.ok(Core.meanDirectionRatio(centered, 3, 2) < 1e-6);
 });
+
+test("meanNeighborScore averages the cosine scores", () => {
+  assert.equal(Core.meanNeighborScore([]), 0);
+  const score = Core.meanNeighborScore([{ score: 0.5 }, { score: 0.8 }, { score: 0.2 }]);
+  assert.ok(Math.abs(score - 0.5) < 1e-12);
+});
+
+test("jaccard compares neighbour lists", () => {
+  assert.equal(Core.jaccard([], []), 1);
+  assert.equal(Core.jaccard([1, 2, 3], [1, 2, 3]), 1);
+  assert.equal(Core.jaccard([1, 2], [1, 3]), 1 / 3);
+  assert.equal(Core.jaccard([1, 2], [3, 4]), 0);
+  assert.equal(Core.jaccard([1, 1, 2], [1, 2]), 1);
+});
+
+test("neighborVote returns the majority label with a deterministic tie-break", () => {
+  const labels = [2, 0, 2, 1];
+  const vote = Core.neighborVote([{ index: 0 }, { index: 1 }, { index: 2 }], labels);
+  assert.deepEqual(vote, { label: 2, count: 2, fraction: 2 / 3 });
+  const tie = Core.neighborVote([{ index: 1 }, { index: 3 }], labels);
+  assert.deepEqual(tie, { label: 0, count: 1, fraction: 0.5 });
+  assert.deepEqual(Core.neighborVote([], labels), { label: null, count: 0, fraction: 0 });
+});

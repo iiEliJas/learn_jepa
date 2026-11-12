@@ -1228,3 +1228,267 @@ a.btn.disabled,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Three-Space Lens */
+.thumb.xlarge {
+  width: 84px;
+  height: 84px;
+  flex: 0 0 84px;
+}
+
+.selected-banner {
+  padding: 14px;
+}
+
+.selected-banner .selected-inline {
+  margin-bottom: 0;
+}
+
+.selected-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-copy h2 {
+  margin: 0 0 2px;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.selected-copy p {
+  margin: 0 0 6px;
+}
+
+.banner-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.banner-links {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  align-self: center;
+}
+
+.lens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+  gap: 14px;
+}
+
+.space-card {
+  --space-color: var(--accent);
+  padding: 14px;
+  border-top: 3px solid var(--space-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.space-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.space-head-copy {
+  min-width: 0;
+}
+
+.space-head-copy h3 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.space-head-copy p {
+  margin: 0;
+}
+
+.space-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--space-color, var(--accent));
+  flex: 0 0 9px;
+  margin-top: 5px;
+}
+
+.space-badge {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--space-color);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.space-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-bottom: 9px;
+}
+
+.space-metric {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 7px;
+  background: #f8fafc;
+  min-width: 0;
+}
+
+.space-metric.good {
+  border-color: #c4e5d4;
+  background: var(--green-soft);
+}
+
+.space-metric.warn {
+  border-color: #f0d3b0;
+  background: var(--orange-soft);
+}
+
+.space-metric .k {
+  display: block;
+  color: var(--faint);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.space-metric .v {
+  display: block;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.space-metric .v.small-v {
+  font-size: 12.5px;
+}
+
+.space-metric .s {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: -1px;
+}
+
+.lens-neighbors {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 0;
+}
+
+.space-note {
+  margin: 9px 0 3px;
+  flex: 1;
+}
+
+.tiny {
+  font-size: 10.5px;
+}
+
+.lens-matrix {
+  display: grid;
+  grid-template-columns: 52px repeat(3, minmax(44px, 1fr));
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  font-size: 11px;
+}
+
+.lens-matrix-corner,
+.lens-matrix-head,
+.lens-matrix-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.lens-matrix-corner {
+  justify-content: flex-start;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lens-matrix-head,
+.lens-matrix-row-head {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+
+.lens-matrix-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  background: #f1f4f8;
+  color: var(--ink);
+}
+
+.consensus-badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.thumb-button .consensus-badge {
+  max-width: none;
+}
+
+.space-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.space-inline .space-dot {
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .selected-banner .selected-inline {
+    flex-wrap: wrap;
+  }
+  .banner-links {
+    margin-left: 0;
+    width: 100%;
+  }
+  .space-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+

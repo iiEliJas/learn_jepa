@@ -39,13 +39,14 @@ use classic scripts so they work from `file://`.
 | `loss_calculator/index.html` | available | nothing |
 | `cifar_atlas/index.html` | available | model + CIFAR-10 |
 | `per_image/index.html` | available | model + CIFAR-10 |
+| `space_lens/index.html` | available | model + CIFAR-10 |
 | collapse simulator | planned | nothing |
 | forward-pass x-ray, attention, augmentation | planned | model |
 
-The atlas and per-image card run from the included assets. The public atlas
-ships a balanced 2,000-image test subset; the checkpoint and the CIFAR-10 data
-stay local and are gitignored. The trained model is published as a GitHub
-release asset instead of being committed. The full roadmap is in
+The atlas, per-image card and three-space lens run from the included assets. The
+public atlas ships a balanced 2,000-image test subset; the checkpoint and the
+CIFAR-10 data stay local and are gitignored. The trained model is published as a
+GitHub release asset instead of being committed. The full roadmap is in
 [`learning_tools.md`](learning_tools.md).
 
 ## Math
@@ -61,9 +62,9 @@ The JavaScript core mirrors the Python reference exactly:
   `mean_over_k` / `sum_over_k`, per-view or joint SIGReg, and the weighted
   total. It uses the same core as the lab.
 - `assets/atlas_core.js`: decoding for the compact base64 tensors, centering,
-  cosine neighbours, pairwise cosine, the per-image prediction term and the
-  shuffled control. The same formulas appear in `pysrc/lejepa/analysis.py` and
-  `pysrc/lejepa/loss.py`.
+  cosine neighbours, pairwise cosine, neighbour overlap and voting, the
+  per-image prediction term and the shuffled control. The same formulas appear
+  in `pysrc/lejepa/analysis.py` and `pysrc/lejepa/loss.py`.
 
 The tests pin the JavaScript SIGReg value to a FP64 PyTorch value computed with
 [`pysrc/lejepa/sigreg.py`](https://github.com/iiEliJas/fast_JEPA/blob/main/pysrc/lejepa/sigreg.py)
@@ -93,7 +94,8 @@ containing `enc`, `proj`, `probe` and the config. Download and checksum
 instructions are in
 [`STARTING_GUIDE.md`](STARTING_GUIDE.md#3-download-the-cifar-model-optional).
 
-The atlas and per-image card share `cifar_atlas/generate.py`. It:
+The atlas, per-image card and three-space lens share `cifar_atlas/generate.py`.
+It:
 
 1. loads the model-only parts of a FastJEPA checkpoint (`enc`, `proj`, `probe`);
 2. selects a deterministic, balanced test subset (200 per class by default);

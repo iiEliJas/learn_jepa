@@ -41,6 +41,10 @@
             4. One image, four views
             <span>The prediction term on a real example, with paired and shuffled controls.</span>
           </a>
+          <a href="space_lens/index.html">
+            5. One image, three spaces
+            <span>CLS, proj_head and projector side by side, with neighbour overlap.</span>
+          </a>
         </div>
       </section>
 
@@ -88,6 +92,17 @@
           </p>
           <span class="go">Open the card →</span>
         </a>
+
+        <a class="demo-card" href="space_lens/index.html">
+          <span class="tag">available · CIFAR assets included</span>
+          <h2>Three-Space Lens</h2>
+          <p>
+            Follow one test image through the raw ViT CLS token, the 512-d
+            <span class="mono">proj_head</span> and the 16-d projector. Compare nearest
+            neighbours, purity, votes and the overlap between all three lists.
+          </p>
+          <span class="go">Open the lens →</span>
+        </a>
       </section>
 
       <section class="card" id="coming-soon" style="margin-top: 18px">
@@ -96,10 +111,10 @@
           <div>
             <h3>Uses the CIFAR export</h3>
             <p class="small muted">
-              The atlas and per-image card are available. Their shared export
-              (<span class="mono">cifar_atlas/atlas_data.js</span>) also feeds the next demos:
-              three-space lens, real-data SIGReg inspector, 16-D inspector, forward-pass
-              x-ray, attention explorer and augmentation playground.
+              The atlas, per-image card and three-space lens are available. Their shared
+              export (<span class="mono">cifar_atlas/atlas_data.js</span>) also feeds the
+              next demos: real-data SIGReg inspector, 16-D inspector, forward-pass x-ray,
+              attention explorer and augmentation playground.
             </p>
           </div>
           <div>

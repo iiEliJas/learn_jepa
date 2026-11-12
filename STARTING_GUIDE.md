@@ -15,9 +15,11 @@ Open [`index.html`](index.html) in a browser and follow the suggested path:
 | [`sigreg_lab/index.html`](sigreg_lab/index.html) | Why does the sliced Epps–Pulley statistic push a cloud toward a Gaussian? |
 | [`cifar_atlas/index.html`](cifar_atlas/index.html) | Where does the trained encoder put each test image, and which errors are semantic? |
 | [`per_image/index.html`](per_image/index.html) | What does the prediction term do to four augmented views of one image? |
+| [`space_lens/index.html`](space_lens/index.html) | How do the CLS, head and projector spaces rank the same image's neighbours? |
 
-The atlas and per-image card run from assets committed to this repository. You
-only need the model checkpoint if you want to regenerate those assets.
+The atlas, per-image card and three-space lens run from assets committed to this
+repository. You only need the model checkpoint if you want to regenerate those
+assets.
 
 ## 2. Run the pages
 
@@ -164,6 +166,7 @@ cifar_atlas/
   package_model.py          full checkpoint → model-only release asset
   index.html, app.js        embedding atlas
 per_image/                  one image, four views
+space_lens/                 one image in CLS, head and projector space
 tests/                      Node and Python tests
 ```
 

@@ -32,6 +32,8 @@ def test_learning_pages_and_assets_exist():
         ROOT / "cifar_atlas" / "atlas_data.js",
         ROOT / "per_image" / "index.html",
         ROOT / "per_image" / "app.js",
+        ROOT / "space_lens" / "index.html",
+        ROOT / "space_lens" / "app.js",
     ]
     missing = [str(path.relative_to(ROOT)) for path in expected if not path.exists()]
     assert not missing, f"missing learning files: {missing}"
@@ -44,6 +46,7 @@ def test_learning_pages_are_self_contained():
         ROOT / "loss_calculator" / "index.html",
         ROOT / "cifar_atlas" / "index.html",
         ROOT / "per_image" / "index.html",
+        ROOT / "space_lens" / "index.html",
     ]
     external = re.compile(r"<(?:script|link|img|iframe)[^>]+(?:src|href)=\"https?://")
     for page in pages:
