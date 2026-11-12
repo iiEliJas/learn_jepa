@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Per-Image Embedding Card — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Four augmented views of one CIFAR-10 image, their projector embeddings, the mean target, pairwise cosine and the prediction-loss contribution."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>Per-Image Embedding Card</h1>
+          <p>
+            One test image, four augmented views, and the 16-d projector space the
+            prediction term lives in. Compare two images, watch <span class="mono">μ</span>
+            move, and break the view correspondence to see what the prediction loss is
+            actually measuring.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Pick images</h2>
+            <div class="control">
+              <label>active slot</label>
+              <div class="segmented" id="slot">
+                <button type="button" data-slot="a" aria-pressed="true">A</button>
+                <button type="button" data-slot="b">B</button>
+              </div>
+            </div>
+            <div class="control">
+              <label for="classPick">class</label>
+              <select id="classPick"></select>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="prevPick" type="button">← prev</button>
+              <button class="btn" id="nextPick" type="button">next →</button>
+              <button class="btn" id="randomPick" type="button">random</button>
+            </div>
+            <div class="thumb-grid pick-grid" id="pickGrid"></div>
+            <p class="small muted" style="margin-top: 8px">
+              Click a thumbnail to load it into the active slot. Use
+              <span class="kbd">A</span> / <span class="kbd">B</span> to choose the slot.
+            </p>
+            <div class="btn-row" style="margin-top: 8px">
+              <button class="btn" id="swapCards" type="button">Swap A and B</button>
+              <a class="btn" id="openAtlas" href="../cifar_atlas/index.html">Open in atlas →</a>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              The four views are four random draws from the training augmentation recipe.
+              The projector maps each view to 16-d. The target
+              <span class="mono">μ</span> is the mean of the four projector outputs, and
+              the prediction term is the mean squared distance from every view to
+              <span class="mono">μ</span>.
+            </p>
+            <div class="formula">
+μ = (1/V) Σ_v z_v
+L_pred = (1 / V·K) Σ_v Σ_k (μ_k − z_v,k)²
+paired:   four views of the same image
+shuffled: view v replaced by another image
+</div>
+            <p class="small muted" style="margin-top: 8px">
+              <span class="mono">μ</span> is not detached in training: gradients flow
+              through the target as well as through each view. The shuffled control keeps
+              the four-view shape but destroys the image correspondence.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Try this</h2>
+            <p>
+              <strong>1. Compare A and B.</strong> Pick two different classes. The paired
+              loss is usually smaller than the shuffled control for both, but the absolute
+              values depend on how hard the image is to augment consistently.
+            </p>
+            <p>
+              <strong>2. Reshuffle.</strong> Press “Reshuffle control” on one card. The
+              shuffled loss jumps when the four views come from unrelated images.
+            </p>
+            <p>
+              <strong>3. Read the matrix.</strong> The diagonal is always 1. High
+              off-diagonal cosine means the views of this image landed close together in
+              projector space; low values mean the objective still has work to do.
+            </p>
+            <p>
+              <strong>4. Notice the layout.</strong> The local 2-D view is a PCA of only
+              four 16-d points. It is a shadow of the real geometry, useful for seeing
+              <span class="mono">μ</span> and the arrows, not for measuring separation.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Comparison numbers">
+            <div class="stat accent">
+              <span class="k">A paired L_pred</span>
+              <span class="v" id="statPairedA">–</span>
+              <span class="s" id="statPairedASub">four views of A</span>
+            </div>
+            <div class="stat accent">
+              <span class="k">B paired L_pred</span>
+              <span class="v" id="statPairedB">–</span>
+              <span class="s" id="statPairedBSub">four views of B</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">A shuffled</span>
+              <span class="v" id="statShuffleA">–</span>
+              <span class="s">broken image correspondence</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">B shuffled</span>
+              <span class="v" id="statShuffleB">–</span>
+              <span class="s">broken image correspondence</span>
+            </div>
+            <div class="stat">
+              <span class="k">subset reference</span>
+              <span class="v" id="statReference">–</span>
+              <span class="s" id="statReferenceSub">paired / shuffled</span>
+            </div>
+          </section>
+
+          <div class="two-col">
+            <section class="card image-card" id="cardA"></section>
+            <section class="card image-card" id="cardB"></section>
+          </div>
+
+          <section class="card">
+            <h2>Side-by-side readout</h2>
+            <p class="hint">
+              The same numbers as the cards, in one table. The shuffled control is local to
+              the selected image: it replaces each view with that view of another image.
+            </p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>image</th>
+                    <th>true class</th>
+                    <th>predicted</th>
+                    <th>paired L_pred</th>
+                    <th>shuffled control</th>
+                    <th>ratio</th>
+                    <th>mean pairwise cosine</th>
+                  </tr>
+                </thead>
+                <tbody id="compareBody"></tbody>
+              </table>
+            </div>
+            <div class="note" id="referenceNote" style="margin-top: 10px"></div>
+          </section>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>Why the projector, not the probe?</h2>
+              <p>
+                The probe feature is trained to classify; the projector is trained to make
+                augmented views agree and to match <span class="mono">N(0, I)</span> under
+                random slices. That is why the card uses projector outputs: they are the
+                tensors that enter <span class="mono">L_pred</span> and SIGReg.
+              </p>
+              <p class="small muted">
+                The 16-d projector is deliberately low-dimensional. A class readout is not
+                its job; the 512-d <span class="mono">proj_head</span> is what the probe
+                sees.
+              </p>
+            </div>
+            <div class="card">
+              <h2>What the shuffled control proves</h2>
+              <p>
+                If the four vectors were unrelated, the mean
+                <span class="mono">μ</span> would sit in the middle of an unrelated cloud
+                and the residual would be larger. The gap between paired and shuffled is
+                the evidence that the model learned view invariance, not just a small
+                embedding norm.
+              </p>
+              <p class="small muted">
+                This is the same control as
+                <span class="mono">shuffled_prediction_loss</span> in
+                <span class="mono">pysrc/lejepa/analysis.py</span>.
+              </p>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Projector outputs are produced in eval mode from
+            <span class="mono">checkpoints/cifar_400epochs/ckpt.pt</span>
+            (SHA-256 <span class="mono" id="footerSha">–</span>) at commit
+            <span class="mono" id="footerCommit">–</span>. Reproduce the assets with
+            <span class="mono">python cifar_atlas/generate.py</span>. Projection and
+            prediction math: <span class="mono">assets/atlas_core.js</span>. Reference:
+            <span class="mono">pysrc/lejepa/loss.py</span> and protocol section 5.1.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/atlas_core.js"></script>
+    <script src="../assets/atlas_ui.js"></script>
+    <script src="../cifar_atlas/atlas_data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

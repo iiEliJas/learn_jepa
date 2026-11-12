@@ -875,3 +875,356 @@ hr.soft {
   border-top: 1px solid var(--line);
   margin: 12px 0;
 }
+
+/* CIFAR atlas and per-image card */
+.atlas-canvas-wrap {
+  position: relative;
+}
+
+.atlas-tooltip[hidden] {
+  display: none;
+}
+
+.atlas-tooltip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 8px 24px rgba(24, 32, 42, 0.16);
+  pointer-events: none;
+  z-index: 5;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.atlas-tooltip canvas {
+  width: 58px;
+  height: 58px;
+  border-radius: 7px;
+  background: #eef1f5;
+  image-rendering: pixelated;
+  flex: 0 0 58px;
+}
+
+.legend-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.legend-marker canvas {
+  width: 14px !important;
+  height: 14px !important;
+  flex: 0 0 14px;
+}
+
+.ring-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+.dash-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px dashed var(--ink);
+  border-radius: 50%;
+  vertical-align: -3px;
+  margin-right: 4px;
+}
+
+.selected-inline {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 6px;
+}
+
+.selected-inline strong {
+  font-size: 15px;
+}
+
+.thumb {
+  border-radius: 7px;
+  background: #eef1f5;
+  image-rendering: pixelated;
+  display: block;
+}
+
+.thumb.large {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+}
+
+.thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.thumb-button {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--muted);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1.2;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.thumb-button:hover {
+  border-color: #b9c9f2;
+  background: #f8faff;
+}
+
+.thumb-button.mismatch {
+  border-color: #f0d3b0;
+  background: #fffaf4;
+}
+
+.thumb-button span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.confusion-matrix {
+  display: grid;
+  grid-template-columns: 72px repeat(10, minmax(23px, 1fr));
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  font-size: 11px;
+}
+
+.confusion-corner,
+.confusion-head,
+.confusion-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 10.5px;
+  min-height: 25px;
+}
+
+.confusion-corner {
+  justify-content: flex-start;
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.confusion-row-head {
+  justify-content: flex-end;
+  padding-right: 4px;
+  font-family: var(--mono);
+}
+
+.confusion-head {
+  font-family: var(--mono);
+  writing-mode: horizontal-tb;
+}
+
+.confusion-cell {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 5px;
+  min-height: 25px;
+  padding: 1px;
+  font: inherit;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.confusion-cell:hover {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+
+.confusion-cell.active {
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+}
+
+.cell-detail {
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+a.btn.disabled,
+.btn.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Per-image embedding card */
+.image-card {
+  padding: 14px;
+}
+
+.image-card h2 {
+  margin: 0 0 2px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.image-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 10px;
+}
+
+.image-card-head p {
+  margin: 0 0 5px;
+}
+
+.view-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.view-tile {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfe;
+}
+
+.view-tile canvas {
+  width: 100%;
+  max-width: 64px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  image-rendering: pixelated;
+}
+
+.view-tile figcaption {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.view-tile figcaption strong {
+  color: var(--ink);
+}
+
+.card-inner-grid {
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.inner-title {
+  margin: 0 0 2px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cos-matrix {
+  display: grid;
+  grid-template-columns: 24px repeat(4, minmax(30px, 1fr));
+  gap: 3px;
+  margin-top: 5px;
+}
+
+.cos-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  min-height: 25px;
+}
+
+.cos-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cos-cell.diagonal {
+  outline: 1px solid rgba(24, 32, 42, 0.24);
+  font-weight: 700;
+}
+
+.card-stats {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.card-stats .stat {
+  padding: 8px 9px;
+}
+
+.card-stats .stat .v {
+  font-size: 16px;
+}
+
+.pick-grid {
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 3px;
+  margin-top: 8px;
+}
+
+.thumb-button.active-a {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.thumb-button.active-b {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px var(--orange-soft);
+}
+
+@media (max-width: 760px) {
+  .confusion-matrix {
+    grid-template-columns: 60px repeat(10, minmax(25px, 1fr));
+  }
+  .view-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

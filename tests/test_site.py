@@ -12,6 +12,7 @@ def test_learning_pages_and_assets_exist():
     expected = [
         ROOT / "index.html",
         ROOT / "README.md",
+        ROOT / "STARTING_GUIDE.md",
         ROOT / "assets" / "learning.css",
         ROOT / "assets" / "canvas.js",
         ROOT / "assets" / "sigreg_core.js",
@@ -20,6 +21,17 @@ def test_learning_pages_and_assets_exist():
         ROOT / "loss_calculator" / "index.html",
         ROOT / "loss_calculator" / "app.js",
         ROOT / "loss_calculator" / "loss_core.js",
+        ROOT / "assets" / "atlas_core.js",
+        ROOT / "assets" / "atlas_ui.js",
+        ROOT / "assets" / "atlas" / "cifar_test.webp",
+        ROOT / "assets" / "atlas" / "cifar_views.webp",
+        ROOT / "cifar_atlas" / "generate.py",
+        ROOT / "cifar_atlas" / "package_model.py",
+        ROOT / "cifar_atlas" / "index.html",
+        ROOT / "cifar_atlas" / "app.js",
+        ROOT / "cifar_atlas" / "atlas_data.js",
+        ROOT / "per_image" / "index.html",
+        ROOT / "per_image" / "app.js",
     ]
     missing = [str(path.relative_to(ROOT)) for path in expected if not path.exists()]
     assert not missing, f"missing learning files: {missing}"
@@ -30,6 +42,8 @@ def test_learning_pages_are_self_contained():
         ROOT / "index.html",
         ROOT / "sigreg_lab" / "index.html",
         ROOT / "loss_calculator" / "index.html",
+        ROOT / "cifar_atlas" / "index.html",
+        ROOT / "per_image" / "index.html",
     ]
     external = re.compile(r"<(?:script|link|img|iframe)[^>]+(?:src|href)=\"https?://")
     for page in pages:

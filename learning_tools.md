@@ -6,6 +6,12 @@ lives here, separate from the C/CUDA implementation in
 interactive learning layer around the existing PyTorch ground truth: formulas,
 real numbers, and hands-on controls, not only static plots.
 
+Implementation status (2026-11-12): SIGReg Lab, LeJEPA Loss Calculator, CIFAR
+Embedding Atlas, Per-Image Embedding Card and the landing page are available.
+The atlas ships a balanced 2,000-image test subset from the 400-epoch CIFAR run;
+the checkpoint and raw CIFAR data remain local. The model-only checkpoint is
+published in the `v0.1.0` GitHub release.
+
 Existing material to build on:
 
 - `tools/analyze_run.py` and `docs/experiments/002_cifar10_lejepa_analysis.md`
@@ -119,10 +125,11 @@ metric.
 
 ## Tier 2: explore the trained CIFAR model (needs a checkpoint)
 
-### 4. CIFAR Embedding Atlas
+### 4. CIFAR Embedding Atlas (available)
 
-**What you can do.** A 2-D map of the test set (10k points) colored by class.
-Hover for a thumbnail; click to lock a selection. Toggle:
+**What you can do.** A 2-D map of a balanced test subset (2,000 images by
+default; the full build can use all 10k) colored by class. Hover for a
+thumbnail; click to lock a selection. Toggle:
 
 - encoder 512-d vs projector 16-d vs raw ViT CLS;
 - raw vs mean-centered features;
@@ -136,12 +143,12 @@ links each cell to the actual images behind that error.
 cosine is dominated by the mean direction, and how the probe feature differs
 from the projector.
 
-**Needs.** `ckpt.pt` + CIFAR-10 test images. Generate a compact asset file
-locally; ship a 1-2k subset publicly.
+**Needs.** `ckpt.pt` + CIFAR-10 test images to regenerate the export. The
+public page runs on the included assets.
 
 **Effort.** L.
 
-### 5. Per-Image Embedding Card
+### 5. Per-Image Embedding Card (available)
 
 **What you can do.** For one image, show its four augmented views, their points
 in a local 2-D view, the mean `mu`, arrows from each view to `mu`, the pairwise
@@ -153,7 +160,7 @@ image.
 example, why `mu` is not detached, and why the projector is trained for
 prediction rather than classification.
 
-**Needs.** Checkpoint (same infrastructure as the atlas).
+**Needs.** The same export as the atlas. Runs on the included assets.
 
 **Effort.** M.
 
@@ -267,7 +274,7 @@ with formulas and "try this" prompts.
 
 ## Recommended first milestone
 
-Already chosen for the first implementation pass:
+The first pass is implemented:
 
 1. SIGReg Lab
 2. LeJEPA Loss Calculator
@@ -275,14 +282,10 @@ Already chosen for the first implementation pass:
 4. Per-Image Embedding Card
 5. A tiny landing page (item 14)
 
-Items 1 and 2 need no checkpoint and can be built immediately. Items 4 and 5
-share an export/asset layer and start as soon as the CIFAR checkpoint and data
-are available. Item 3 is the best follow-up if we want a conceptual
-"why SIGReg?" demo before the checkpoint exists.
-
-Suggested order after that: 9 (forward x-ray), 3 (collapse simulator), 6
-(three-space lens), 7 + 8 (real-data SIGReg), 10 (attention), 11
-(augmentation), 12-13 (run dashboards).
+The atlas and per-image card share the export layer in
+`cifar_atlas/generate.py`; the landing page links the four demos. The next
+conceptual demo is the collapse simulator (item 3), followed by the
+three-space lens and the real-data SIGReg inspector.
 
 ---
 
@@ -303,11 +306,18 @@ loss_calculator/
   index.html
   loss_core.js
   app.js
-cifar_atlas/                 (next; needs checkpoint)
-  generate.py
+cifar_atlas/
+  generate.py                export model outputs + sprites
   index.html
-  app.js
-per_image/                   (next; shares atlas assets)
+  app.js                     DOM, canvas, confusion drill-down
+  atlas_data.js              generated (included)
+per_image/
+  index.html
+  app.js                     four views, local layout, L_pred
+assets/
+  atlas_core.js              pure decode/neighbour/prediction math
+  atlas_ui.js                sprite and marker helpers
+  atlas/*.webp               generated thumbnail sheets
 tests/
   *.test.js                  Node fixture tests
   test_site.py               structure and self-containment test

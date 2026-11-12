@@ -33,13 +33,13 @@
             2. SIGReg, visually
             <span>Directions, projections, characteristic functions and the push outward.</span>
           </a>
-          <a href="#coming-soon">
+          <a href="cifar_atlas/index.html">
             3. The CIFAR embedding atlas
-            <span>Click a test image and see its neighbours and augmented views.</span>
+            <span>Click a test image and see its neighbours, space by space.</span>
           </a>
-          <a href="#coming-soon">
-            4. Inside the ViT
-            <span>Forward-pass values, patch norms and attention maps.</span>
+          <a href="per_image/index.html">
+            4. One image, four views
+            <span>The prediction term on a real example, with paired and shuffled controls.</span>
           </a>
         </div>
       </section>
@@ -67,26 +67,26 @@
           <span class="go">Open the calculator →</span>
         </a>
 
-        <a class="demo-card" href="#coming-soon">
-          <span class="tag soon">coming next · needs checkpoint</span>
+        <a class="demo-card" href="cifar_atlas/index.html">
+          <span class="tag">available · CIFAR assets included</span>
           <h2>CIFAR Embedding Atlas</h2>
           <p>
-            A clickable 2-D map of the test set with encoder/projector toggles, nearest
-            neighbours, misclassified-only views and a confusion-cell drill-down. This is the
-            “where does the model put this image?” demo.
+            A clickable 2-D map of a balanced test subset with CLS/head/projector toggles,
+            raw vs mean-centered features, PCA/t-SNE, nearest neighbours, misclassified-only
+            views and a confusion-cell drill-down.
           </p>
-          <span class="go">See the plan →</span>
+          <span class="go">Open the atlas →</span>
         </a>
 
-        <a class="demo-card" href="#coming-soon">
-          <span class="tag soon">coming next · needs checkpoint</span>
+        <a class="demo-card" href="per_image/index.html">
+          <span class="tag">available · CIFAR assets included</span>
           <h2>Per-Image Embedding Card</h2>
           <p>
-            One image, four augmented views, their points, the mean <span class="mono">μ</span>,
-            pairwise cosine and the prediction-loss contribution. Compare two images side by
-            side.
+            One image, four augmented views, their local 2-D layout, the mean
+            <span class="mono">μ</span>, pairwise cosine and the per-view prediction-loss
+            contribution. Compare two images side by side.
           </p>
-          <span class="go">See the plan →</span>
+          <span class="go">Open the card →</span>
         </a>
       </section>
 
@@ -94,12 +94,12 @@
         <h2>What is next</h2>
         <div class="three-col">
           <div>
-            <h3>Needs the CIFAR checkpoint</h3>
+            <h3>Uses the CIFAR export</h3>
             <p class="small muted">
-              The atlas, per-image card, three-space lens, real-data SIGReg inspector, 16-D
-              inspector, forward-pass x-ray, attention explorer and augmentation playground all
-              share a compact model/asset export. The local plan is in
-              <span class="mono">learning_tools.md</span>.
+              The atlas and per-image card are available. Their shared export
+              (<span class="mono">cifar_atlas/atlas_data.js</span>) also feeds the next demos:
+              three-space lens, real-data SIGReg inspector, 16-D inspector, forward-pass
+              x-ray, attention explorer and augmentation playground.
             </p>
           </div>
           <div>
@@ -145,7 +145,7 @@
         and
         <a href="https://github.com/iiEliJas/fast_JEPA/blob/main/docs/experiments/002_cifar10_lejepa_analysis.md"
           >the first CIFAR-10 analysis</a
-        >.
+        >. New here? Read the <a href="STARTING_GUIDE.md">starting guide</a>.
       </footer>
     </div>
   </body>

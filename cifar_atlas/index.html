@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CIFAR Embedding Atlas — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Interactive 2-D atlas of CIFAR-10 test embeddings: raw ViT CLS, proj_head and projector spaces, with a confusion-matrix drill-down."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>CIFAR Embedding Atlas</h1>
+          <p>
+            A balanced subset of the CIFAR-10 test set in three embedding spaces. Pick a
+            space, centre the features or not, and switch between PCA and a precomputed
+            t-SNE. Hover for a thumbnail, click to lock an image, then follow a confusion
+            cell back to the images behind the error.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>View</h2>
+            <div class="control">
+              <label for="space">feature space</label>
+              <select id="space">
+                <option value="cls">raw ViT CLS (192-d)</option>
+                <option value="head" selected>proj_head (512-d)</option>
+                <option value="proj">projector (16-d)</option>
+              </select>
+            </div>
+            <div class="control">
+              <label>features</label>
+              <div class="segmented" id="centering">
+                <button type="button" data-centered="false">raw</button>
+                <button type="button" data-centered="true" aria-pressed="true">mean-centered</button>
+              </div>
+            </div>
+            <div class="control">
+              <label for="projection">projection</label>
+              <select id="projection">
+                <option value="tsne">t-SNE (precomputed)</option>
+                <option value="pca">PCA</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="filter">show</label>
+              <select id="filter">
+                <option value="all">all points</option>
+                <option value="errors">misclassified only</option>
+                <option value="class">one class</option>
+                <option value="cell">a confusion cell</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="classFilter">class filter</label>
+              <select id="classFilter"></select>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="resetView" type="button">Reset view</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Selected image</h2>
+            <div id="selectedCard">
+              <p class="small muted">
+                Click a point on the map to lock an image, or use the confusion cell
+                thumbnails.
+              </p>
+            </div>
+            <a class="btn" id="openCard" href="#" style="margin-top: 10px">Open full card →</a>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              Each dot is one test image. The same image appears in three learned spaces:
+              the raw ViT CLS token, the 512-d <span class="mono">proj_head</span> used by
+              the probe, and the 16-d projector output used by the prediction loss and
+              SIGReg.
+            </p>
+            <div class="formula">
+              raw cosine:  zᵀx / (‖z‖‖x‖)
+              centered:    (z − μ)ᵀ(x − μ) / (‖z − μ‖‖x − μ‖)
+              μ = mean feature over the subset
+            </div>
+            <p class="small muted" style="margin-top: 8px">
+              The raw ViT features have a large common mean direction. Raw cosine then
+              looks high for almost every pair; centring removes that direction before
+              comparing.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Try this</h2>
+            <p>
+              <strong>1. Raw vs centred.</strong> Keep the 512-d head and switch from raw to
+              mean-centered. The mean-direction ratio drops and the class structure becomes
+              easier to see.
+            </p>
+            <p>
+              <strong>2. Compare spaces.</strong> The projector is only 16-d. It is trained
+              for prediction and SIGReg, not for classification; its map is more diffuse
+              than the probe feature.
+            </p>
+            <p>
+              <strong>3. Follow an error.</strong> Click a red confusion cell. The panel
+              shows the actual images; click one to open its full embedding card.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Headline numbers">
+            <div class="stat accent">
+              <span class="k">shown</span>
+              <span class="v" id="statShown">–</span>
+              <span class="s" id="statShownSub">of the test subset</span>
+            </div>
+            <div class="stat good">
+              <span class="k">probe top-1</span>
+              <span class="v" id="statProbe">–</span>
+              <span class="s" id="statProbeSub">centre crop, eval mode</span>
+            </div>
+            <div class="stat">
+              <span class="k">k-NN top-1</span>
+              <span class="v" id="statKnn">–</span>
+              <span class="s" id="statKnnSub">k = 20</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">mean-direction ratio</span>
+              <span class="v" id="statAniso">–</span>
+              <span class="s" id="statAnisoSub">raw ‖mean‖ / mean ‖x‖</span>
+            </div>
+            <div class="stat">
+              <span class="k">projection</span>
+              <span class="v" id="statPca">–</span>
+              <span class="s" id="statPcaSub">PC1 + PC2</span>
+            </div>
+          </section>
+
+          <section class="plot-card wide">
+            <h3><span id="mapTitle">Embedding map</span></h3>
+            <p class="hint">
+              Marker shape and colour both encode the true class. Hover for a thumbnail and
+              the predicted label; click to lock a selection. <span id="mapCount"></span>
+            </p>
+            <div class="canvas-wrap wide atlas-canvas-wrap" id="atlasWrap">
+              <canvas id="atlasCanvas" aria-label="2-D embedding atlas"></canvas>
+              <div id="atlasTooltip" class="atlas-tooltip" hidden></div>
+            </div>
+            <div class="legend" id="mapLegend"></div>
+          </section>
+
+          <div class="two-col">
+            <section class="card">
+              <h2>Confusion matrix</h2>
+              <p class="hint">
+                Rows are true labels, columns are predictions. Click a cell to filter the
+                map to exactly those images; the thumbnails show the errors themselves.
+              </p>
+              <div id="confusionMatrix" class="confusion-matrix" role="grid"></div>
+              <div id="cellDetail" class="cell-detail">
+                <p class="small muted">
+                  Click a cell to show the images behind that prediction.
+                </p>
+              </div>
+            </section>
+
+            <section class="card">
+              <h2>Nearest neighbours</h2>
+              <p class="hint" id="neighborHint">
+                Pick a point to see the eight closest embeddings.
+              </p>
+              <div id="neighborGrid" class="thumb-grid"></div>
+              <p class="small muted" id="neighborStats"></p>
+              <div class="note" style="margin-top: 10px">
+                The map is a 2-D shadow. Neighbour lists are computed in the full selected
+                space, so a point can be far on the map and still be a close neighbour.
+              </div>
+            </section>
+          </div>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>How the probe and projector differ</h2>
+              <p>
+                The probe is a small <span class="mono">LayerNorm + Linear</span> head on
+                the 512-d feature, trained with labels. The projector is a
+                <span class="mono">512 → 512 → 16</span> MLP trained by the LeJEPA
+                objective. The probe is allowed to be semantic; the projector is asked to
+                be predictable across views and close to <span class="mono">N(0, I)</span>
+                in every random slice.
+              </p>
+              <p class="small muted">
+                That is why the 16-d projector can have a lower effective rank and a more
+                diffuse class geometry than the 512-d head, while still being the space
+                where <span class="mono">L_pred</span> and SIGReg are measured.
+              </p>
+            </div>
+            <div class="card">
+              <h2>What the confusion cell shows</h2>
+              <p>
+                A cell is not necessarily a “hard class”. It is a joint event: true label
+                <span class="mono">y</span> and predicted label <span class="mono">ŷ</span>.
+                The thumbnail strip is the evidence for that cell. Use it to check whether
+                the error is a genuine semantic confusion or a single odd image.
+              </p>
+              <p class="small muted">
+                The atlas uses the test split only. The 512-d probe feature is the same
+                one the training run evaluates; all embeddings are produced in eval mode,
+                so the projector's BatchNorm uses running statistics.
+              </p>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Assets generated from
+            <span class="mono">checkpoints/cifar_400epochs/ckpt.pt</span>
+            (SHA-256 <span class="mono" id="footerSha">–</span>) at commit
+            <span class="mono" id="footerCommit">–</span>. Reproduce with
+            <span class="mono">python cifar_atlas/generate.py</span>. Projection and
+            neighbour math: <span class="mono">assets/atlas_core.js</span>. Reference:
+            <span class="mono">pysrc/lejepa/analysis.py</span> and protocol section 5.1.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/atlas_core.js"></script>
+    <script src="../assets/atlas_ui.js"></script>
+    <script src="atlas_data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
