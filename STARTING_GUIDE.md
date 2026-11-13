@@ -16,10 +16,11 @@ Open [`index.html`](index.html) in a browser and follow the suggested path:
 | [`cifar_atlas/index.html`](cifar_atlas/index.html) | Where does the trained encoder put each test image, and which errors are semantic? |
 | [`per_image/index.html`](per_image/index.html) | What does the prediction term do to four augmented views of one image? |
 | [`space_lens/index.html`](space_lens/index.html) | How do the CLS, head and projector spaces rank the same image's neighbours? |
+| [`projector_diagnostics/index.html`](projector_diagnostics/index.html) | Is each projector dimension Gaussian, are dimensions correlated, and what is real-data SIGReg? |
 
-The atlas, per-image card and three-space lens run from assets committed to this
-repository. You only need the model checkpoint if you want to regenerate those
-assets.
+The atlas, per-image card, three-space lens and projector diagnostics run from
+assets committed to this repository. You only need the model checkpoint if you
+want to regenerate those assets.
 
 ## 2. Run the pages
 
@@ -157,6 +158,7 @@ assets/
   learning.css              shared style
   canvas.js                 canvas/plot helpers
   sigreg_core.js            pure SIGReg math
+  projector_core.js         moments, KS distance, correlation
   atlas_core.js             decode, neighbours, prediction terms
   atlas_ui.js               sprite and marker helpers
 sigreg_lab/                 interactive SIGReg lab
@@ -167,6 +169,7 @@ cifar_atlas/
   index.html, app.js        embedding atlas
 per_image/                  one image, four views
 space_lens/                 one image in CLS, head and projector space
+projector_diagnostics/      marginals, correlation, real-data SIGReg
 tests/                      Node and Python tests
 ```
 

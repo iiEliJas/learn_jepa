@@ -151,6 +151,10 @@ a:hover {
   margin-bottom: 12px;
 }
 
+.control[hidden] {
+  display: none;
+}
+
 .control > label {
   grid-column: 1;
   grid-row: 1;
@@ -1491,4 +1495,148 @@ a.btn.disabled,
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Projector diagnostics */
+.lens-chart {
+  height: 270px;
+}
+
+.hist-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.hist-cell {
+  margin: 0;
+  min-width: 0;
+  padding: 6px 7px 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfe;
+}
+
+.hist-cell.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.hist-cell figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.hist-cell canvas {
+  width: 100%;
+  height: 104px;
+}
+
+.hist-sigma {
+  color: var(--faint);
+}
+
+.corr-matrix {
+  display: grid;
+  grid-template-columns: 30px repeat(16, minmax(15px, 1fr));
+  gap: 2px;
+  margin-top: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.corr-corner,
+.corr-head,
+.corr-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--faint);
+}
+
+.corr-corner {
+  justify-content: flex-start;
+}
+
+.corr-row-head {
+  justify-content: flex-end;
+  padding-right: 3px;
+}
+
+.corr-cell {
+  min-height: 20px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.corr-cell:hover {
+  outline: 1.5px solid var(--ink);
+}
+
+.corr-cell.selected {
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+}
+
+.corr-scale {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.corr-gradient {
+  flex: 1;
+  height: 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(180, 35, 24, 0.78),
+    rgba(255, 255, 255, 1) 50%,
+    rgba(36, 88, 214, 0.78)
+  );
+}
+
+.dim-table tr.selected {
+  background: var(--accent-soft);
+}
+
+.dim-table td {
+  font-size: 11px;
+  padding: 4px 6px;
+}
+
+.dim-table th {
+  font-size: 10.5px;
+  padding: 5px 6px;
+}
+
+@media (max-width: 1080px) {
+  .hist-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .hist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lens-chart {
+    height: 230px;
+  }
+}
+
 

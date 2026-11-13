@@ -6,11 +6,12 @@ lives here, separate from the C/CUDA implementation in
 interactive learning layer around the existing PyTorch ground truth: formulas,
 real numbers, and hands-on controls, not only static plots.
 
-Implementation status (2026-11-12): SIGReg Lab, LeJEPA Loss Calculator, CIFAR
-Embedding Atlas, Per-Image Embedding Card, Three-Space Lens and the landing page
-are available. The atlas ships a balanced 2,000-image test subset from the
-400-epoch CIFAR run; the checkpoint and raw CIFAR data remain local. The
-model-only checkpoint is published in the `v0.1.0` GitHub release.
+Implementation status (2026-11-13): SIGReg Lab, LeJEPA Loss Calculator, CIFAR
+Embedding Atlas, Per-Image Embedding Card, Three-Space Lens, Projector
+Diagnostics and the landing page are available. The atlas ships a balanced
+2,000-image test subset from the 400-epoch CIFAR run; the checkpoint and raw
+CIFAR data remain local. The model-only checkpoint is published in the `v0.1.0`
+GitHub release.
 
 Existing material to build on:
 
@@ -181,30 +182,24 @@ label while retrieving different images.
 
 **Effort.** S/M.
 
-### 7. Real-Data SIGReg Inspector
+### 7–8. Projector Diagnostics (available, combines both)
 
-**What you can do.** Run the SIGReg Lab panels on actual model batches. Compare
-model vs Gaussian, `per_view` vs `joint`, train mode vs eval mode (BatchNorm
-statistics), per-slice `T_s`, KS distance and skew/kurtosis.
+**What you can do.** Real model batches in the 16-d projector space. One
+histogram per dimension against `N(0,1)`, per-dimension mean/std/skew/excess
+kurtosis and KS distance, a 16×16 correlation matrix with pinned pairs, and the
+SIGReg statistic per random direction. Switch between one center-crop embedding
+per image and four views per image, between `per_view` and `joint` SIGReg, and
+between batch sizes from 128 to all 2,000. A resample button draws a new batch;
+another draws new random directions.
 
-**What it teaches.** The regularizer on real embeddings; explains the report's
-training `2.47`, evaluation `2.84`, and Gaussian-null `1.05`.
+**What it teaches.** The regularizer on real embeddings: the report's training
+`2.47`, evaluation `2.84` and Gaussian null `1.05`; why raw `T_s` grows with the
+point count while the null floor does not; and what "the projector is nearly
+isotropic" means when marginals look Gaussian but correlations need not.
 
-**Needs.** Checkpoint.
+**Needs.** The same export as the atlas. Runs on the included assets.
 
 **Effort.** M.
-
-### 8. 16-Dimension Inspector
-
-**What you can do.** A grid of 16 histograms (model vs `N(0,1)`), per-dimension
-mean/std/skew/kurtosis, a correlation matrix, and a "resample batch" button.
-
-**What it teaches.** Isotropy, per-dimension collapse, and what "the projector
-is nearly isotropic" means.
-
-**Needs.** Checkpoint.
-
-**Effort.** S.
 
 ### 9. Forward-Pass X-Ray
 
@@ -285,12 +280,12 @@ The first pass is implemented:
 3. CIFAR Embedding Atlas
 4. Per-Image Embedding Card
 5. Three-Space Lens
-6. A tiny landing page (item 14)
+6. Projector Diagnostics (items 7–8)
+7. A tiny landing page (item 14)
 
-The atlas, per-image card and lens share the export layer in
-`cifar_atlas/generate.py`; the landing page links all five demos. The next
-conceptual demo is the collapse simulator (item 3), followed by the combined
-real-data SIGReg / 16-D inspector.
+The atlas, per-image card, lens and diagnostics share the export layer in
+`cifar_atlas/generate.py`; the landing page links all six demos. The next
+conceptual demo is the collapse simulator (item 3).
 
 ---
 
@@ -304,6 +299,7 @@ assets/
   learning.css               shared style
   canvas.js                  canvas/plot helpers
   sigreg_core.js             pure SIGReg math (require-able from Node)
+  projector_core.js          moments, KS distance, correlation
 sigreg_lab/
   index.html
   app.js                     DOM and canvas
@@ -322,6 +318,9 @@ per_image/
 space_lens/
   index.html
   app.js                     same image in CLS, head and projector space
+projector_diagnostics/
+  index.html
+  app.js                     marginals, correlation, real-data SIGReg
 assets/
   atlas_core.js              pure decode/neighbour/prediction math
   atlas_ui.js                sprite and marker helpers

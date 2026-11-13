@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Projector Diagnostics — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Real-data diagnostics for the 16-d LeJEPA projector: per-dimension histograms, moments, correlation and SIGReg per slice, with batch resampling."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>Projector Diagnostics</h1>
+          <p>
+            The 16-d projector is where <span class="mono">L_pred</span> and SIGReg are
+            measured. This page looks at its actual output: one histogram per dimension,
+            moments and KS distance to <span class="mono">N(0, 1)</span>, the 16×16
+            correlation matrix, and the per-slice SIGReg statistic on the same batch.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Batch</h2>
+            <div class="control">
+              <label>points</label>
+              <div class="segmented" id="dataset">
+                <button type="button" data-dataset="center" aria-pressed="true">center crop</button>
+                <button type="button" data-dataset="views">four views</button>
+              </div>
+            </div>
+            <div class="control" id="modeControl">
+              <label>SIGReg mode</label>
+              <div class="segmented" id="sigMode">
+                <button type="button" data-mode="per_view" aria-pressed="true">per-view</button>
+                <button type="button" data-mode="joint">joint</button>
+              </div>
+            </div>
+            <div class="control">
+              <label for="batchSize">images per batch</label>
+              <select id="batchSize">
+                <option value="128">128</option>
+                <option value="256" selected>256</option>
+                <option value="512">512</option>
+                <option value="1000">1,000</option>
+                <option value="2000">all 2,000</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="resampleBatch" type="button">Resample batch</button>
+            </div>
+            <p class="small muted" id="batchNote"></p>
+          </section>
+
+          <section class="card">
+            <h2>SIGReg</h2>
+            <div class="control">
+              <label for="dirs">random directions</label>
+              <select id="dirs">
+                <option value="16">16</option>
+                <option value="32">32</option>
+                <option value="64" selected>64</option>
+                <option value="96">96</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="tMax">t_max</label>
+              <select id="tMax">
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="knots">quadrature knots</label>
+              <select id="knots">
+                <option value="17" selected>17</option>
+                <option value="33">33</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="newDirections" type="button">New directions</button>
+            </div>
+            <p class="small muted">
+              The statistic is averaged over random unit directions. Resampling the
+              directions shows the Monte Carlo spread; the batch stays fixed.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              Each point is a 16-d projector output. The page treats that vector as a
+              sample from one joint distribution and asks two questions:
+            </p>
+            <div class="formula">
+              per dimension: is it N(0,1)?
+              pairwise:      are dimensions correlated?
+              SIGReg:        does every 1-D slice look Gaussian?
+              T_s = N · Σ_t err(t) · w(t), averaged over slices
+            </div>
+            <p class="small muted" style="margin-top: 8px">
+              A projector can have roughly unit variance in every dimension and still
+              fail the slice test: correlated dimensions or the wrong shape show up in
+              <span class="mono">T_s</span>. That is why the page shows the marginals,
+              the correlation matrix and the slice statistic together.
+            </p>
+            <p class="small muted">
+              All embeddings are produced in eval mode, so the projector's BatchNorm
+              layers use their running statistics. The batch is sampled from the
+              2,000-image test subset.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Try this</h2>
+            <p>
+              <strong>1. Watch the null.</strong> The dashed line is the finite-sample
+              Gaussian expectation, about <span class="mono">1.05</span>. It does not
+              depend on the batch size. The model sits well above it.
+            </p>
+            <p>
+              <strong>2. Change the batch.</strong> Raise the batch from 256 to all
+              2,000. The raw <span class="mono">T_s</span> grows with the number of
+              points; the “at N = 256” number stays roughly stable. That scaling is
+              why the report's <span class="mono">2.47</span> and
+              <span class="mono">2.84</span> are batch-size statements.
+            </p>
+            <p>
+              <strong>3. Resample.</strong> With 256 points, the histograms and the
+              correlation matrix are noisy. Press “Resample batch” a few times and
+              watch which correlations survive. Switch to all 2,000 for a stable
+              picture.
+            </p>
+            <p>
+              <strong>4. Compare modes.</strong> With four views, switch between
+              per-view and joint SIGReg. They agree once both are rescaled to the same
+              number of points, but the raw values differ because the joint mode pools
+              four times as many points.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Headline numbers">
+            <div class="stat accent">
+              <span class="k">T_s at N = 256</span>
+              <span class="v" id="statSig">–</span>
+              <span class="s" id="statSigSub">rescaled from this batch</span>
+            </div>
+            <div class="stat">
+              <span class="k">raw T_s</span>
+              <span class="v" id="statRaw">–</span>
+              <span class="s" id="statRawSub">as computed</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">Gaussian null</span>
+              <span class="v" id="statNull">–</span>
+              <span class="s" id="statNullSub">finite-sample expectation</span>
+            </div>
+            <div class="stat good">
+              <span class="k">max |corr|</span>
+              <span class="v" id="statCorr">–</span>
+              <span class="s" id="statCorrSub">off-diagonal</span>
+            </div>
+            <div class="stat">
+              <span class="k">points</span>
+              <span class="v" id="statBatch">–</span>
+              <span class="s" id="statBatchSub">in this batch</span>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Real-data SIGReg, slice by slice</h2>
+            <p class="hint">
+              Each point is one random direction, projected and compared with the
+              characteristic function of <span class="mono">N(0, 1)</span>. The
+              vertical axis is rescaled to a 256-point batch so different batch sizes
+              are comparable.
+            </p>
+            <div class="canvas-wrap lens-chart">
+              <canvas id="sliceCanvas" aria-label="Per-slice SIGReg statistic"></canvas>
+            </div>
+            <div class="legend" id="sliceLegend"></div>
+            <div class="note" id="sigNote" style="margin-top: 10px"></div>
+          </section>
+
+          <section class="card">
+            <h2>Sixteen marginals</h2>
+            <p class="hint">
+              One panel per projector dimension. The solid line is the batch density;
+              the dashed line is <span class="mono">N(0, 1)</span>. Values outside
+              ±4 are not drawn, but the table uses every point.
+            </p>
+            <div class="hist-grid" id="histGrid"></div>
+            <div class="legend">
+              <span><span class="swatch line" style="background:#2458d6"></span>batch</span>
+              <span><span class="swatch line" style="background:#18202a"></span>N(0, 1)</span>
+            </div>
+            <p class="small muted" id="histNote"></p>
+          </section>
+
+          <div class="two-col">
+            <section class="card">
+              <h2>Correlation matrix</h2>
+              <p class="hint">
+                Pearson correlation over the current batch. Click a cell to pin a pair;
+                the two dimensions are outlined in the marginal grid above.
+              </p>
+              <div id="corrMatrix" class="corr-matrix" role="grid"></div>
+              <div class="corr-scale" aria-hidden="true">
+                <span>−1</span>
+                <span class="corr-gradient"></span>
+                <span>+1</span>
+              </div>
+              <p class="small muted" id="corrNote"></p>
+            </section>
+
+            <section class="card">
+              <h2>Per-dimension moments</h2>
+              <p class="hint">
+                Excess kurtosis is 0 for a Gaussian. KS is the maximum distance between
+                the empirical CDF and <span class="mono">Φ</span>.
+              </p>
+              <div class="table-scroll dim-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>dim</th>
+                      <th>mean</th>
+                      <th>std</th>
+                      <th>skew</th>
+                      <th>ex. kurt</th>
+                      <th>KS</th>
+                      <th>range</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dimBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <section class="two-col">
+            <div class="card">
+              <h2>Why marginals are not enough</h2>
+              <p>
+                A dimension can be perfectly standard-normal on its own while the
+                vector is far from <span class="mono">N(0, I)</span>: rotate a Gaussian
+                cloud and the marginals change, or correlate two coordinates and each
+                marginal stays Gaussian. SIGReg projects onto many directions, so it
+                sees the joint shape that the 16 histograms miss.
+              </p>
+              <p class="small muted">
+                The reverse is also true: finite-sample marginals look noisy even when
+                the distribution is right. The KS distance and the Gaussian-null line
+                are there to keep that noise in perspective.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Reading T_s</h2>
+              <p>
+                <span class="mono">T_s = N · Σ_t err(t) · w(t)</span>, where
+                <span class="mono">err</span> is the squared difference between the
+                empirical characteristic function and
+                <span class="mono">exp(−t²/2)</span>. The raw number grows with the
+                batch, but not purely linearly: the finite-sample null floor stays
+                constant while the signal scales with
+                <span class="mono">N</span>. The page reports
+                <span class="mono">null + (T_s − null) · 256 / N</span>, so a
+                2,000-point batch can be compared with the 256-point batches used in
+                training reports without understating the small batch.
+              </p>
+              <p class="small muted">
+                The Gaussian null is the finite-grid expectation
+                <span class="mono">Σ_t (1 − φ₀(t)²) · w(t)</span>, not zero. At
+                <span class="mono">t_max = 3</span> and 17 knots it is about
+                <span class="mono">1.05</span>.
+              </p>
+            </div>
+          </section>
+
+          <footer class="footer">
+            Projector outputs come from
+            <span class="mono">checkpoints/cifar_400epochs/ckpt.pt</span>
+            (SHA-256 <span class="mono" id="footerSha">–</span>) at commit
+            <span class="mono" id="footerCommit">–</span>, exported in eval mode by
+            <span class="mono">cifar_atlas/generate.py</span>. Distribution math:
+            <span class="mono">assets/projector_core.js</span>; SIGReg:
+            <span class="mono">assets/sigreg_core.js</span>. Reference:
+            <span class="mono">pysrc/lejepa/sigreg.py</span> and protocol section 5.2.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/sigreg_core.js"></script>
+    <script src="../assets/atlas_core.js"></script>
+    <script src="../loss_calculator/loss_core.js"></script>
+    <script src="../assets/projector_core.js"></script>
+    <script src="../cifar_atlas/atlas_data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
