@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Collapse Simulator — FastJEPA learning tools</title>
+    <meta
+      name="description"
+      content="Train a tiny LeJEPA on two-view 2-D data in the browser. Switch SIGReg off and watch the embedding collapse to a line while the prediction loss improves."
+    />
+    <link rel="stylesheet" href="../assets/learning.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="demo-header">
+        <div>
+          <h1>Collapse Simulator</h1>
+          <p>
+            A 2→8→2 encoder, a small predictor, and the LeJEPA objective on
+            two views of 2-D data. Train it for a few hundred steps, then switch
+            off the anti-collapse term. The prediction loss improves while the
+            representation loses a dimension.
+          </p>
+        </div>
+        <a class="back-link" href="../index.html">← all learning tools</a>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="card">
+            <h2>Run</h2>
+            <div class="control">
+              <label>anti-collapse term</label>
+              <div class="segmented" id="antiCollapse">
+                <button type="button" data-on="true" aria-pressed="true">SIGReg on</button>
+                <button type="button" data-on="false">SIGReg off</button>
+              </div>
+            </div>
+            <div class="control">
+              <label for="lambda">lambda</label>
+              <output id="lambdaOut">0.50</output>
+              <input id="lambda" type="range" min="0.05" max="1" step="0.05" value="0.5" />
+            </div>
+            <div class="control">
+              <label for="noise">view noise</label>
+              <output id="noiseOut">0.20</output>
+              <input id="noise" type="range" min="0.05" max="0.5" step="0.05" value="0.2" />
+            </div>
+            <div class="control">
+              <label for="step">training step</label>
+              <output id="stepOut">240 / 240</output>
+              <input id="step" type="range" min="0" max="240" step="1" value="240" />
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="playPause" type="button">Replay training</button>
+              <button class="btn" id="newData" type="button">New data</button>
+            </div>
+            <p class="small muted" id="trainNote"></p>
+          </section>
+
+          <section class="card">
+            <h2>What am I looking at?</h2>
+            <p>
+              96 points in three Gaussian clusters, each with two noisy views. The
+              encoder maps a view to a 2-D embedding; the predictor maps one view's
+              embedding to the other. Everything trains in your browser with plain
+              SGD.
+            </p>
+            <div class="formula">
+              encoder    2 → 8 tanh → 2
+              predictor  2 → 8 tanh → 2
+              L = L_pred + λ · mean_v SIGReg(z_v)
+            </div>
+            <p class="small muted" style="margin-top: 8px">
+              <span class="mono">L_pred</span> is the mean squared error between
+              the predicted and target view embeddings. SIGReg is the same sliced
+              Epps–Pulley statistic used by the lab; its Gaussian null at this
+              sample size is about <span class="mono">1.05</span>.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Why collapse happens</h2>
+            <p>
+              The prediction term is smallest when both views land on the same
+              point. A constant encoder makes <span class="mono">L_pred</span>
+              almost zero, and a rank-1 encoder can already predict one coordinate
+              from the other. Nothing in the prediction term asks the embedding to
+              keep its dimensions.
+            </p>
+            <p class="small muted">
+              That is why collapse is often dimensional before it is total: the
+              cloud becomes a line, then a point. The loss curve alone can look
+              like progress. The rank and per-dimension spread are the diagnostics
+              that reveal what was lost.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Try this</h2>
+            <p>
+              <strong>1. Remove the regularizer.</strong> Switch SIGReg off, then
+              replay. <span class="mono">L_pred</span> falls towards zero,
+              <span class="mono">L_SIGReg</span> explodes and the effective rank
+              drops to about 1. The embedding is now a line.
+            </p>
+            <p>
+              <strong>2. Put it back.</strong> Switch SIGReg on with
+              <span class="mono">λ = 0.5</span>. The prediction loss settles
+              higher, but the rank stays near 2 and the slices remain close to
+              Gaussian.
+            </p>
+            <p>
+              <strong>3. Find the boundary.</strong> Lower
+              <span class="mono">λ</span> in steps. At some point the prediction
+              term wins and the cloud collapses again. The regularizer is a
+              constraint, not a metric.
+            </p>
+            <p>
+              <strong>4. Make prediction harder.</strong> Raise the view noise.
+              A collapsed encoder still predicts well, so the failure mode does
+              not disappear with harder data.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Toy, not the CIFAR run</h2>
+            <p class="small muted">
+              This page is a controlled 2-D experiment, not the ViT. The encoder
+              and predictor are tiny, the optimizer is plain SGD, and there is no
+              EMA or probe. The objective is the same shape; the scale is chosen
+              so a collapse fits in a few hundred CPU steps.
+            </p>
+          </section>
+        </aside>
+
+        <main class="main">
+          <section class="stats" aria-label="Current training snapshot">
+            <div class="stat">
+              <span class="k">step</span>
+              <span class="v" id="statStep">–</span>
+              <span class="s" id="statStepSub">of 240</span>
+            </div>
+            <div class="stat accent">
+              <span class="k">L_pred</span>
+              <span class="v" id="statPred">–</span>
+              <span class="s">paired views</span>
+            </div>
+            <div class="stat warn">
+              <span class="k">L_SIGReg</span>
+              <span class="v" id="statSig">–</span>
+              <span class="s" id="statSigSub">Gaussian null ≈ 1.05</span>
+            </div>
+            <div class="stat">
+              <span class="k">objective</span>
+              <span class="v" id="statTotal">–</span>
+              <span class="s" id="statTotalSub">L_pred + λ · L_sig</span>
+            </div>
+            <div class="stat good">
+              <span class="k">effective rank</span>
+              <span class="v" id="statRank">–</span>
+              <span class="s">0 point · 1 line · 2 disk</span>
+            </div>
+            <div class="stat">
+              <span class="k">σ per dim</span>
+              <span class="v" id="statStd">–</span>
+              <span class="s">σ₁ / σ₂</span>
+            </div>
+          </section>
+
+          <div class="two-col">
+            <section class="card">
+              <h2>Input space</h2>
+              <p class="hint">
+                Three clusters, two noisy views per point. Colour is the source
+                cluster; small dots are the two views, larger dots are the base
+                points.
+              </p>
+              <div class="canvas-wrap cloud-wrap">
+                <canvas id="inputCanvas" aria-label="Synthetic two-view data"></canvas>
+              </div>
+              <div class="legend" id="inputLegend"></div>
+            </section>
+
+            <section class="card">
+              <h2>Embedding space</h2>
+              <p class="hint">
+                The encoder's 2-D output at the current step. Filled and hollow
+                dots are the two views; the thin line joins a pair. The cross is
+                the mean of all embeddings.
+              </p>
+              <div class="canvas-wrap cloud-wrap">
+                <canvas id="embedCanvas" aria-label="Encoder embedding cloud"></canvas>
+              </div>
+              <div class="legend" id="embedLegend"></div>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="note" id="collapseNote"></div>
+          </section>
+
+          <section class="plot-grid three">
+            <div class="plot-card">
+              <h3>Prediction loss</h3>
+              <p class="hint">Lower is not better if the embedding has collapsed.</p>
+              <div class="canvas-wrap plot-canvas">
+                <canvas id="predCanvas" aria-label="Prediction loss over training"></canvas>
+              </div>
+            </div>
+            <div class="plot-card">
+              <h3>SIGReg</h3>
+              <p class="hint">Dashed line: finite-sample Gaussian expectation.</p>
+              <div class="canvas-wrap plot-canvas">
+                <canvas id="sigCanvas" aria-label="SIGReg over training"></canvas>
+              </div>
+              <div class="legend" id="sigLegend"></div>
+            </div>
+            <div class="plot-card">
+              <h3>Geometry</h3>
+              <p class="hint">Effective rank and the two per-dimension spreads.</p>
+              <div class="canvas-wrap plot-canvas">
+                <canvas id="geomCanvas" aria-label="Effective rank and per-dimension standard deviation"></canvas>
+              </div>
+              <div class="legend" id="geomLegend"></div>
+            </div>
+          </section>
+
+          <div class="two-col">
+            <div class="card">
+              <h2>Read the rank, not just the loss</h2>
+              <p>
+                The left loss curve rewards prediction. On its own it cannot tell
+                the difference between a representation that encodes the image and
+                one that throws the image away. The geometry panel does: effective
+                rank is the participation ratio of the embedding covariance, so it
+                goes to 1 for a line and 2 for a filled 2-D cloud. The per-dimension
+                σ's show the same thing in the original axes.
+              </p>
+              <p class="small muted">
+                In the CIFAR run the projector is 16-d, not 2-d, but the diagnostic
+                is the same: per-dimension spread, correlation and the SIGReg
+                slices. The diagnostics page shows that version.
+              </p>
+            </div>
+            <div class="card">
+              <h2>The two runs</h2>
+              <p>
+                With SIGReg, the objective pays for spread: prediction is a little
+                worse, but every slice stays close to a Gaussian and the rank stays
+                high. Without it, the encoder finds the cheaper solution. The total
+                objective is lower in the collapsed run, which is precisely why the
+                term is needed.
+              </p>
+              <p class="small muted">
+                SIGReg is not a monitor bolted onto training; it changes the
+                minimizer. Switch it off and the prediction term is free to choose
+                the constant map.
+              </p>
+            </div>
+          </div>
+
+          <footer class="footer">
+            Objective and prediction term:
+            <span class="mono">pysrc/lejepa/loss.py</span>. SIGReg:
+            <span class="mono">pysrc/lejepa/sigreg.py</span> and
+            <span class="mono">assets/sigreg_core.js</span>. Encoder, predictor and
+            gradients: <span class="mono">collapse_sim/collapse_core.js</span>,
+            checked against finite differences in the Node tests. Reference:
+            protocol sections 5.1 and 5.2. The run is deterministic for a given
+            seed; “New data” changes the seed.
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/canvas.js"></script>
+    <script src="../assets/sigreg_core.js"></script>
+    <script src="collapse_core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

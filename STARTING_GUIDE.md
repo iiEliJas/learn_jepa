@@ -17,10 +17,12 @@ Open [`index.html`](index.html) in a browser and follow the suggested path:
 | [`per_image/index.html`](per_image/index.html) | What does the prediction term do to four augmented views of one image? |
 | [`space_lens/index.html`](space_lens/index.html) | How do the CLS, head and projector spaces rank the same image's neighbours? |
 | [`projector_diagnostics/index.html`](projector_diagnostics/index.html) | Is each projector dimension Gaussian, are dimensions correlated, and what is real-data SIGReg? |
+| [`collapse_sim/index.html`](collapse_sim/index.html) | Why does a JEPA need an anti-collapse term, and what does collapse look like before the loss reveals it? |
 
 The atlas, per-image card, three-space lens and projector diagnostics run from
 assets committed to this repository. You only need the model checkpoint if you
-want to regenerate those assets.
+want to regenerate those assets. The collapse simulator is synthetic and trains
+in the browser, so it needs neither.
 
 ## 2. Run the pages
 
@@ -170,6 +172,7 @@ cifar_atlas/
 per_image/                  one image, four views
 space_lens/                 one image in CLS, head and projector space
 projector_diagnostics/      marginals, correlation, real-data SIGReg
+collapse_sim/               tiny browser-trained LeJEPA, collapse diagnostics
 tests/                      Node and Python tests
 ```
 

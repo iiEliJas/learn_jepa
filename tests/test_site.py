@@ -37,6 +37,9 @@ def test_learning_pages_and_assets_exist():
         ROOT / "space_lens" / "app.js",
         ROOT / "projector_diagnostics" / "index.html",
         ROOT / "projector_diagnostics" / "app.js",
+        ROOT / "collapse_sim" / "index.html",
+        ROOT / "collapse_sim" / "app.js",
+        ROOT / "collapse_sim" / "collapse_core.js",
     ]
     missing = [str(path.relative_to(ROOT)) for path in expected if not path.exists()]
     assert not missing, f"missing learning files: {missing}"
@@ -51,6 +54,7 @@ def test_learning_pages_are_self_contained():
         ROOT / "per_image" / "index.html",
         ROOT / "space_lens" / "index.html",
         ROOT / "projector_diagnostics" / "index.html",
+        ROOT / "collapse_sim" / "index.html",
     ]
     external = re.compile(r"<(?:script|link|img|iframe)[^>]+(?:src|href)=\"https?://")
     for page in pages:

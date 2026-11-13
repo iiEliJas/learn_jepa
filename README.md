@@ -41,14 +41,15 @@ use classic scripts so they work from `file://`.
 | `per_image/index.html` | available | model + CIFAR-10 |
 | `space_lens/index.html` | available | model + CIFAR-10 |
 | `projector_diagnostics/index.html` | available | model + CIFAR-10 |
-| collapse simulator | planned | nothing |
+| `collapse_sim/index.html` | available | nothing |
 | forward-pass x-ray, attention, augmentation | planned | model |
 
 The atlas, per-image card, three-space lens and projector diagnostics run from
-the included assets. The public atlas ships a balanced 2,000-image test subset;
-the checkpoint and the CIFAR-10 data stay local and are gitignored. The trained
-model is published as a GitHub release asset instead of being committed. The
-full roadmap is in [`learning_tools.md`](learning_tools.md).
+the included assets. The collapse simulator trains a toy model on synthetic data.
+The public atlas ships a balanced 2,000-image test subset; the checkpoint and the
+CIFAR-10 data stay local and are gitignored. The trained model is published as a
+GitHub release asset instead of being committed. The full roadmap is in
+[`learning_tools.md`](learning_tools.md).
 
 ## Math
 
@@ -69,6 +70,10 @@ The JavaScript core mirrors the Python reference exactly:
 - `assets/projector_core.js`: per-dimension moments, KS distance to `N(0,1)`,
   the correlation matrix and deterministic batch sampling. The SIGReg values
   themselves come from `assets/sigreg_core.js`.
+- `collapse_sim/collapse_core.js`: a 2→8→2 tanh encoder and predictor with
+  manual backprop, `L = L_pred + λ·mean_v SIGReg(z_v)`, and the participation
+  ratio used as the effective-rank diagnostic. Every gradient is checked
+  against central finite differences.
 
 The tests pin the JavaScript SIGReg value to a FP64 PyTorch value computed with
 [`pysrc/lejepa/sigreg.py`](https://github.com/iiEliJas/fast_JEPA/blob/main/pysrc/lejepa/sigreg.py)

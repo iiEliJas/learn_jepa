@@ -107,7 +107,7 @@ problem, and what changes when `lambda` moves.
 
 **Effort.** S.
 
-### 3. Collapse Simulator
+### 3. Collapse Simulator (available)
 
 **What you can do.** Train a tiny 2-layer encoder + predictor on synthetic
 two-view 2-D data for a few hundred CPU steps. Toggle SIGReg on/off and scrub
@@ -277,15 +277,17 @@ The first pass is implemented:
 
 1. SIGReg Lab
 2. LeJEPA Loss Calculator
-3. CIFAR Embedding Atlas
-4. Per-Image Embedding Card
-5. Three-Space Lens
-6. Projector Diagnostics (items 7–8)
-7. A tiny landing page (item 14)
+3. Collapse Simulator
+4. CIFAR Embedding Atlas
+5. Per-Image Embedding Card
+6. Three-Space Lens
+7. Projector Diagnostics (items 7–8)
+8. A tiny landing page (item 14)
 
 The atlas, per-image card, lens and diagnostics share the export layer in
-`cifar_atlas/generate.py`; the landing page links all six demos. The next
-conceptual demo is the collapse simulator (item 3).
+`cifar_atlas/generate.py`; the collapse simulator is synthetic. The landing page
+links all seven demos. The next checkpoint-backed demo is the forward-pass x-ray
+(item 9); a guided tour of JEPA and a run comparator need no checkpoint.
 
 ---
 
@@ -321,6 +323,10 @@ space_lens/
 projector_diagnostics/
   index.html
   app.js                     marginals, correlation, real-data SIGReg
+collapse_sim/
+  index.html
+  app.js                     controls, canvases, playback, URL state
+  collapse_core.js           toy encoder/predictor, backprop, training loop
 assets/
   atlas_core.js              pure decode/neighbour/prediction math
   atlas_ui.js                sprite and marker helpers

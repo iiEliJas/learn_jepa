@@ -417,6 +417,16 @@ input[type="number"] {
   aspect-ratio: 16 / 8;
 }
 
+.cloud-wrap {
+  aspect-ratio: 1 / 1;
+  max-height: 360px;
+  margin: 0 auto;
+}
+
+.plot-canvas {
+  aspect-ratio: 16 / 10;
+}
+
 canvas {
   display: block;
   width: 100%;
