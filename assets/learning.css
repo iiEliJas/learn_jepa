@@ -584,6 +584,9 @@ tbody tr:hover {
     position: static;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .path {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -598,7 +601,8 @@ tbody tr:hover {
   .plot-grid,
   .plot-grid.three,
   .two-col,
-  .three-col {
+  .three-col,
+  .path {
     grid-template-columns: 1fr;
   }
   .plot-card.wide {
@@ -704,7 +708,7 @@ tbody tr:hover {
 
 .path {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   counter-reset: step;
 }

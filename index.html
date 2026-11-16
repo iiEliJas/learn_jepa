@@ -26,31 +26,39 @@
         <h2>Suggested path</h2>
         <div class="path">
           <a href="loss_calculator/index.html">
-            1. The loss, by hand
+            The loss, by hand
             <span>Edit a tiny z tensor and see L_pred, L_SIGReg and lambda.</span>
           </a>
           <a href="sigreg_lab/index.html">
-            2. SIGReg, visually
+            SIGReg, visually
             <span>Directions, projections, characteristic functions and the push outward.</span>
           </a>
+          <a href="collapse_sim/index.html">
+            Collapse, in front of you
+            <span>Train a tiny encoder, switch off the regularizer, and watch the rank fall.</span>
+          </a>
           <a href="cifar_atlas/index.html">
-            3. The CIFAR embedding atlas
+            The CIFAR embedding atlas
             <span>Click a test image and see its neighbours, space by space.</span>
           </a>
           <a href="per_image/index.html">
-            4. One image, four views
+            One image, four views
             <span>The prediction term on a real example, with paired and shuffled controls.</span>
           </a>
           <a href="space_lens/index.html">
-            5. One image, three spaces
+            One image, three spaces
             <span>CLS, proj_head and projector side by side, with neighbour overlap.</span>
           </a>
         </div>
+        <p class="small muted" style="margin: 12px 0 0">
+          Then stress-test the trained projector in
+          <a href="projector_diagnostics/index.html">Projector Diagnostics</a>.
+        </p>
       </section>
 
       <section class="card-grid" aria-label="Available demos">
         <a class="demo-card" href="sigreg_lab/index.html">
-          <span class="tag">available · no checkpoint</span>
+          <span class="tag">no checkpoint</span>
           <h2>SIGReg Lab</h2>
           <p>
             Draw a 2-D embedding cloud, project it onto random directions, and watch the sliced
@@ -61,7 +69,7 @@
         </a>
 
         <a class="demo-card" href="loss_calculator/index.html">
-          <span class="tag">available · no checkpoint</span>
+          <span class="tag">no checkpoint</span>
           <h2>LeJEPA Loss Calculator</h2>
           <p>
             A tiny <span class="mono">(V, N, K)</span> batch you can edit. See the global-view
@@ -72,7 +80,7 @@
         </a>
 
         <a class="demo-card" href="cifar_atlas/index.html">
-          <span class="tag">available · CIFAR assets included</span>
+          <span class="tag">uses CIFAR assets</span>
           <h2>CIFAR Embedding Atlas</h2>
           <p>
             A clickable 2-D map of a balanced test subset with CLS/head/projector toggles,
@@ -83,7 +91,7 @@
         </a>
 
         <a class="demo-card" href="per_image/index.html">
-          <span class="tag">available · CIFAR assets included</span>
+          <span class="tag">uses CIFAR assets</span>
           <h2>Per-Image Embedding Card</h2>
           <p>
             One image, four augmented views, their local 2-D layout, the mean
@@ -94,7 +102,7 @@
         </a>
 
         <a class="demo-card" href="space_lens/index.html">
-          <span class="tag">available · CIFAR assets included</span>
+          <span class="tag">uses CIFAR assets</span>
           <h2>Three-Space Lens</h2>
           <p>
             Follow one test image through the raw ViT CLS token, the 512-d
@@ -105,7 +113,7 @@
         </a>
 
         <a class="demo-card" href="projector_diagnostics/index.html">
-          <span class="tag">available · CIFAR assets included</span>
+          <span class="tag">uses CIFAR assets</span>
           <h2>Projector Diagnostics</h2>
           <p>
             Sixteen marginal histograms, moments and KS distance, the 16×16 correlation
@@ -116,7 +124,7 @@
         </a>
 
         <a class="demo-card" href="collapse_sim/index.html">
-          <span class="tag">available · no checkpoint</span>
+          <span class="tag">no checkpoint</span>
           <h2>Collapse Simulator</h2>
           <p>
             Train a tiny 2→8→2 LeJEPA on synthetic 2-D views in the browser. Switch
@@ -128,60 +136,82 @@
         </a>
       </section>
 
-      <section class="card" id="coming-soon" style="margin-top: 18px">
-        <h2>What is next</h2>
+      <section class="card" id="roadmap" style="margin-top: 18px">
+        <h2>Roadmap</h2>
+        <p>
+          The first pass is complete. These pages are next; each one extends the
+          existing export pipeline rather than adding a new one.
+        </p>
         <div class="three-col">
           <div>
-            <h3>Uses the CIFAR export</h3>
+            <h3>Forward-pass x-ray</h3>
             <p class="small muted">
-              The atlas, per-image card, three-space lens and projector diagnostics are
-              available. Their shared export
-              (<span class="mono">cifar_atlas/atlas_data.js</span>) also feeds the next
-              demos: forward-pass x-ray, attention explorer and augmentation playground.
+              Follow one image through the ViT: patch embeddings, token norms and
+              attention entropy at each block.
             </p>
           </div>
           <div>
-            <h3>No checkpoint needed</h3>
+            <h3>Attention explorer</h3>
             <p class="small muted">
-              The collapse simulator is available and needs no checkpoint: it trains
-              a tiny encoder and predictor on synthetic 2-D views. A guided tour of
-              JEPA itself and a run comparator are the next checkpoint-free demos.
+              Where each head looks, and how the CLS token aggregates patch
+              information across layers.
             </p>
           </div>
           <div>
-            <h3>How the static pages work</h3>
+            <h3>Augmentation playground</h3>
             <p class="small muted">
-              Open <span class="mono">index.html</span> directly, or serve this folder with
-              <span class="mono">python -m http.server</span>. No CDN, no build step, no runtime
-              server. The math is the same as <span class="mono">pysrc/lejepa/sigreg.py</span>.
+              The view generator behind <span class="mono">L_pred</span>, with paired
+              and shuffled controls you can vary.
             </p>
           </div>
         </div>
+        <p class="small muted" style="margin: 12px 0 0">
+          A run comparator and a guided tour of JEPA are also planned. Design notes
+          and the longer list live in <a href="learning_tools.md">learning_tools.md</a>.
+        </p>
       </section>
 
-      <section class="card" style="margin-top: 18px">
-        <h2>Why this exists</h2>
-        <p>
-          The experiment reports already have good static figures, but a static PCA plot cannot
-          answer “which image is this point?” or “what happens if I make the cloud narrower?”.
-          These pages are the interactive layer around the PyTorch ground truth: every panel
-          shows the formula, the current numbers, and a control that changes them.
-        </p>
-        <p>
-          The training code, the C/CUDA kernels, the protocol and the benchmark numbers live in
-          <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a>. This repository only
-          turns that work into learning material.
-        </p>
-        <div class="note">
-          The demos are learning material, not benchmarks. The trained-checkpoint numbers in the
-          experiment log remain the source of truth for claims about the model.
+      <section class="card" id="about" style="margin-top: 18px">
+        <h2>About the demos</h2>
+        <div class="three-col">
+          <div>
+            <h3>Real model outputs</h3>
+            <p class="small muted">
+              The CIFAR demos read a 2,000-image test subset exported from the
+              400-epoch run. CLS, <span class="mono">proj_head</span> and projector
+              vectors are the model's own; the checkpoint is a release asset, not a
+              committed file.
+            </p>
+          </div>
+          <div>
+            <h3>Static by design</h3>
+            <p class="small muted">
+              Every page is a classic script with no CDN, bundler or runtime server.
+              Open <span class="mono">index.html</span> from disk, or serve the folder
+              with <span class="mono">python3 -m http.server</span>.
+            </p>
+          </div>
+          <div>
+            <h3>Math you can check</h3>
+            <p class="small muted">
+              The JavaScript cores are tested against the PyTorch reference: SIGReg
+              quadrature, the loss terms, neighbour metrics and the toy gradients.
+              <a href="STARTING_GUIDE.md#5-run-the-tests">Run the tests</a>.
+            </p>
+          </div>
+        </div>
+        <div class="note" style="margin-top: 12px">
+          These pages are learning material, not benchmarks. The experiment log in
+          <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> remains the
+          source of truth for claims about the model.
         </div>
       </section>
 
       <footer class="footer">
         Part of the <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> project ·
-        Apache-2.0 · see <a href="learning_tools.md">learning_tools.md</a> for the full roadmap
-        and
+        Apache-2.0 · source on
+        <a href="https://github.com/iiEliJas/learn_jepa">GitHub</a> · full roadmap in
+        <a href="learning_tools.md">learning_tools.md</a> · background:
         <a href="https://github.com/iiEliJas/fast_JEPA/blob/main/docs/experiments/002_cifar10_lejepa_analysis.md"
           >the first CIFAR-10 analysis</a
         >. New here? Read the <a href="STARTING_GUIDE.md">starting guide</a>.
