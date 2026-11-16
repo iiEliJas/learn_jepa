@@ -18,10 +18,10 @@ jobs:
     name: JavaScript tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "22"
       - name: Check syntax
         run: find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
       - name: Run math tests
@@ -31,8 +31,8 @@ jobs:
     name: Site and export checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install test dependencies
