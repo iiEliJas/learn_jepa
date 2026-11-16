@@ -1,5 +1,7 @@
 # learn_jepa
 
+[![CI](https://github.com/iiEliJas/learn_jepa/actions/workflows/ci.yml/badge.svg)](https://github.com/iiEliJas/learn_jepa/actions/workflows/ci.yml)
+
 Interactive, dependency-free demos for understanding JEPA, LeJEPA, SIGReg and the
 CIFAR-10 representation.
 
@@ -30,6 +32,15 @@ python3 -m http.server 8000
 
 No build step, no CDN, no runtime server, no extra Python dependency. The pages
 use classic scripts so they work from `file://`.
+
+## Hosting
+
+The repository is already the site. GitHub Pages can serve it from the Actions
+tab with `.github/workflows/pages.yml`, which uploads the working tree as-is —
+there is nothing to compile. Enable Pages under **Settings → Pages** with
+**Source: GitHub Actions** first. Free Pages sites require a public repository;
+the workflow is manual so a private repository stays green until that is
+decided.
 
 ## What exists
 
@@ -83,16 +94,18 @@ on the same points and directions. The formula reference is section 5.2 of the
 ## Tests
 
 ```bash
+python3 -m pip install -r requirements-dev.txt
 node --test tests/*.test.js
 python3 -m pytest tests/test_site.py -q
 ~/projects/fast_jepa/.venv/bin/python -m pytest tests/test_learning_export.py -q
 ```
 
-The Node suite needs no Python. `test_site.py` skips the Node suite if Node
-is not installed, and also checks that the pages do not depend on external
-URLs. The export test validates the shipped tensors on its own, and re-runs a
-few images through PyTorch when the local checkpoint and CIFAR-10 batches are
-present.
+The Node suite needs no Python. `test_site.py` skips the Node suite if Node is
+not installed, and checks page structure, local links and self-containment. The
+export test validates the shipped tensors on its own, and re-runs a few images
+through PyTorch when the local checkpoint and CIFAR-10 batches are present. CI
+runs the Node suite and the PyTorch-free Python checks on every push; the
+parity test skips there because the checkpoint and dataset are not committed.
 
 ## Regenerating the CIFAR assets
 

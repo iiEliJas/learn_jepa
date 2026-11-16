@@ -141,14 +141,17 @@ faster PCA-only build. The checkpoint and CIFAR-10 data stay gitignored.
 ## 5. Run the tests
 
 ```bash
+python3 -m pip install -r requirements-dev.txt
 node --test tests/*.test.js
 python3 -m pytest tests/test_site.py -q
 ~/projects/fast_jepa/.venv/bin/python -m pytest tests/test_learning_export.py -q
 ```
 
-`test_site.py` runs the Node suite and checks that the pages are self-contained.
-`test_learning_export.py` validates the shipped tensors on its own, then re-runs
-a few images through PyTorch when the local checkpoint and CIFAR-10 data exist.
+`test_site.py` runs the Node suite, checks page structure and local links, and
+verifies that the pages are self-contained. `test_learning_export.py` validates
+the shipped tensors on its own, then re-runs a few images through PyTorch when
+the local checkpoint and CIFAR-10 data exist. CI runs the Node suite and the
+PyTorch-free Python checks on every push.
 
 ## 6. Repository map
 
@@ -156,6 +159,8 @@ a few images through PyTorch when the local checkpoint and CIFAR-10 data exist.
 index.html                  landing page / guided tour
 STARTING_GUIDE.md           this file
 learning_tools.md           roadmap and design notes
+.github/workflows/          CI and static-site deploy
+requirements-dev.txt        pytest for the Python checks
 assets/
   learning.css              shared style
   canvas.js                 canvas/plot helpers

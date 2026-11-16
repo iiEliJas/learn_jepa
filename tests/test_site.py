@@ -79,3 +79,42 @@ def test_learning_javascript_suite():
         timeout=120,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_local_links_resolve():
+    pages = [
+        ROOT / "index.html",
+        ROOT / "sigreg_lab" / "index.html",
+        ROOT / "loss_calculator" / "index.html",
+        ROOT / "cifar_atlas" / "index.html",
+        ROOT / "per_image" / "index.html",
+        ROOT / "space_lens" / "index.html",
+        ROOT / "projector_diagnostics" / "index.html",
+        ROOT / "collapse_sim" / "index.html",
+    ]
+    references = re.compile(r'(?:href|src)="([^"]+)"')
+    skip = ("http://", "https://", "#", "mailto:", "data:", "javascript:")
+    missing = []
+    for page in pages:
+        for reference in references.findall(page.read_text()):
+            if reference.startswith(skip):
+                continue
+            target = (page.parent / reference.split("#", 1)[0]).resolve()
+            if not target.exists():
+                missing.append(f"{page.relative_to(ROOT)} -> {reference}")
+    assert not missing, f"broken local links: {missing}"
+
+
+def test_landing_page_links_every_demo():
+    text = (ROOT / "index.html").read_text()
+    demos = [
+        "sigreg_lab",
+        "loss_calculator",
+        "cifar_atlas",
+        "per_image",
+        "space_lens",
+        "projector_diagnostics",
+        "collapse_sim",
+    ]
+    missing = [demo for demo in demos if f'href="{demo}/index.html"' not in text]
+    assert not missing, f"landing page does not link: {missing}"

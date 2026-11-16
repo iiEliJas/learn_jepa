@@ -331,6 +331,9 @@ assets/
   atlas_core.js              pure decode/neighbour/prediction math
   atlas_ui.js                sprite and marker helpers
   atlas/*.webp               generated thumbnail sheets
+.github/workflows/ci.yml     Node and Python checks
+.github/workflows/pages.yml  manual static-site deploy
+requirements-dev.txt         pytest for the site/export checks
 tests/
   *.test.js                  Node fixture tests
   test_site.py               structure and self-containment test

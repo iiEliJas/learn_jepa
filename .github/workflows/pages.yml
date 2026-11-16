@@ -1,0 +1,40 @@
+# Deploy the static demos to GitHub Pages.
+#
+# The pages need no build step, so the artifact is the repository itself.
+# This workflow is manual on purpose: Pages must first be enabled in
+# Settings -> Pages (source: GitHub Actions), and free Pages sites require a
+# public repository. Once the repository is public and Pages is enabled, add
+#
+#   push:
+#     branches: [main]
+#
+# to the `on:` block if you want every push to redeploy.
+
+name: Deploy static site
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
