@@ -107,6 +107,15 @@ through PyTorch when the local checkpoint and CIFAR-10 batches are present. CI
 runs the Node suite and the PyTorch-free Python checks on every push; the
 parity test skips there because the checkpoint and dataset are not committed.
 
+## Contributing
+
+Small fixes and new demo ideas are welcome. Keep the static-first rule: classic
+scripts, no CDN, no bundler and no runtime server. Run the test commands above
+before opening a pull request; CI runs the same Node and Python checks. For a
+new page, start from [`STARTING_GUIDE.md`](STARTING_GUIDE.md#6-repository-map)
+and add the export or core module under `assets/` rather than duplicating math
+inside the page.
+
 ## Regenerating the CIFAR assets
 
 The trained model is not in git. The
