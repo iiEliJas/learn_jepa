@@ -1,219 +1,206 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FastJEPA learning tools</title>
-    <meta
-      name="description"
-      content="Interactive demos for understanding JEPA, LeJEPA, SIGReg and the CIFAR-10 representation."
-    />
-    <link rel="stylesheet" href="assets/learning.css" />
-  </head>
-  <body>
-    <div class="page">
-      <header class="hero">
-        <span class="eyebrow">FastJEPA · learning tools</span>
-        <h1>Learn LeJEPA by playing with it.</h1>
-        <p>
-          Static, dependency-free demos that turn the equations and the training logs into
-          things you can drag, click, and inspect. Start with the objective, then look at where
-          the trained CIFAR-10 model puts its embeddings.
-        </p>
-      </header>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FastJEPA learning tools</title>
+<meta name="description" content="Interactive demos for understanding JEPA, LeJEPA, SIGReg and the CIFAR-10 representation." />
+<style>
+:root{
+  --paper:#f2f5f1; --sheet:#fbfcfa; --grid:rgba(45,79,208,.08); --ink:#1b2a49; --soft:#5a6578;
+  --accent:#2d4fd0; --mark:#ffe36e; --rule:rgba(27,42,73,.22);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#12161d; --sheet:#181d26; --grid:rgba(143,168,255,.07); --ink:#e6eaf2; --soft:#9aa5b8;
+  --accent:#8fa8ff; --mark:#5c4f12; --rule:rgba(230,234,242,.2);
+}}
+:root[data-theme="dark"]{
+  --paper:#12161d; --sheet:#181d26; --grid:rgba(143,168,255,.07); --ink:#e6eaf2; --soft:#9aa5b8;
+  --accent:#8fa8ff; --mark:#5c4f12; --rule:rgba(230,234,242,.2);
+}
+.theme{position:fixed;top:12px;right:12px;z-index:5;font:.8rem var(--mono);background:var(--sheet);color:var(--ink);
+  border:1px solid var(--rule);border-radius:3px;padding:4px 10px;cursor:pointer}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:1.0625rem/1.65 var(--serif);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono);font-size:.88em}
+h1,h2,h3{font-weight:600;line-height:1.15;margin:0}
+.mark{background:linear-gradient(transparent 55%,var(--mark) 55%)}
 
-      <section class="card" style="margin-top: 4px">
-        <h2>Suggested path</h2>
-        <div class="path">
-          <a href="loss_calculator/index.html">
-            The loss, by hand
-            <span>Edit a tiny z tensor and see L_pred, L_SIGReg and lambda.</span>
-          </a>
-          <a href="sigreg_lab/index.html">
-            SIGReg, visually
-            <span>Directions, projections, characteristic functions and the push outward.</span>
-          </a>
-          <a href="collapse_sim/index.html">
-            Collapse, in front of you
-            <span>Train a tiny encoder, switch off the regularizer, and watch the rank fall.</span>
-          </a>
-          <a href="cifar_atlas/index.html">
-            The CIFAR embedding atlas
-            <span>Click a test image and see its neighbours, space by space.</span>
-          </a>
-          <a href="per_image/index.html">
-            One image, four views
-            <span>The prediction term on a real example, with paired and shuffled controls.</span>
-          </a>
-          <a href="space_lens/index.html">
-            One image, three spaces
-            <span>CLS, proj_head and projector side by side, with neighbour overlap.</span>
-          </a>
-        </div>
-        <p class="small muted" style="margin: 12px 0 0">
-          Then stress-test the trained projector in
-          <a href="projector_diagnostics/index.html">Projector Diagnostics</a>.
-        </p>
-      </section>
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:64px 0 48px}
+.hero h1{font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.015em}
+.hero p{max-width:34em;color:var(--soft);margin:18px 0 0}
+.hero .cta{display:inline-block;margin-top:22px;padding:.6em 1.1em;background:var(--ink);color:var(--paper);
+  text-decoration:none;font-weight:600;border-radius:3px}
+figure{margin:0}
+.fig{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px;
+  box-shadow:3px 3px 0 var(--rule)}
+canvas{display:block;width:100%;aspect-ratio:1/1;touch-action:none;cursor:crosshair;border-radius:2px}
+.readout{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:.82rem var(--mono);padding:8px 4px 2px;color:var(--soft)}
+.readout b{color:var(--ink)}
+figcaption{font-size:.9rem;color:var(--soft);padding:6px 4px 2px}
+.toggle{font:inherit;font-size:.85rem;background:none;border:1px solid var(--rule);color:var(--ink);
+  border-radius:3px;padding:2px 10px;cursor:pointer}
 
-      <section class="card-grid" aria-label="Available demos">
-        <a class="demo-card" href="sigreg_lab/index.html">
-          <span class="tag">no checkpoint</span>
-          <h2>SIGReg Lab</h2>
-          <p>
-            Draw a 2-D embedding cloud, project it onto random directions, and watch the sliced
-            Epps–Pulley statistic compare it with <span class="mono">N(0, I)</span>. Includes the
-            quadrature table, per-slice values and the gradient force.
-          </p>
-          <span class="go">Open the lab →</span>
-        </a>
-
-        <a class="demo-card" href="loss_calculator/index.html">
-          <span class="tag">no checkpoint</span>
-          <h2>LeJEPA Loss Calculator</h2>
-          <p>
-            A tiny <span class="mono">(V, N, K)</span> batch you can edit. See the global-view
-            mean, the prediction error arrows, per-view SIGReg, and the effect of
-            <span class="mono">lambda</span> and the mean-vs-sum convention.
-          </p>
-          <span class="go">Open the calculator →</span>
-        </a>
-
-        <a class="demo-card" href="cifar_atlas/index.html">
-          <span class="tag">uses CIFAR assets</span>
-          <h2>CIFAR Embedding Atlas</h2>
-          <p>
-            A clickable 2-D map of a balanced test subset with CLS/head/projector toggles,
-            raw vs mean-centered features, PCA/t-SNE, nearest neighbours, misclassified-only
-            views and a confusion-cell drill-down.
-          </p>
-          <span class="go">Open the atlas →</span>
-        </a>
-
-        <a class="demo-card" href="per_image/index.html">
-          <span class="tag">uses CIFAR assets</span>
-          <h2>Per-Image Embedding Card</h2>
-          <p>
-            One image, four augmented views, their local 2-D layout, the mean
-            <span class="mono">μ</span>, pairwise cosine and the per-view prediction-loss
-            contribution. Compare two images side by side.
-          </p>
-          <span class="go">Open the card →</span>
-        </a>
-
-        <a class="demo-card" href="space_lens/index.html">
-          <span class="tag">uses CIFAR assets</span>
-          <h2>Three-Space Lens</h2>
-          <p>
-            Follow one test image through the raw ViT CLS token, the 512-d
-            <span class="mono">proj_head</span> and the 16-d projector. Compare nearest
-            neighbours, purity, votes and the overlap between all three lists.
-          </p>
-          <span class="go">Open the lens →</span>
-        </a>
-
-        <a class="demo-card" href="projector_diagnostics/index.html">
-          <span class="tag">uses CIFAR assets</span>
-          <h2>Projector Diagnostics</h2>
-          <p>
-            Sixteen marginal histograms, moments and KS distance, the 16×16 correlation
-            matrix and real-data SIGReg per slice. Resample the batch and the random
-            directions to see which structure survives.
-          </p>
-          <span class="go">Open diagnostics →</span>
-        </a>
-
-        <a class="demo-card" href="collapse_sim/index.html">
-          <span class="tag">no checkpoint</span>
-          <h2>Collapse Simulator</h2>
-          <p>
-            Train a tiny 2→8→2 LeJEPA on synthetic 2-D views in the browser. Switch
-            SIGReg off and the prediction loss improves while the embedding collapses
-            to a line; the effective rank and per-dimension spread show what the loss
-            hides.
-          </p>
-          <span class="go">Open the simulator →</span>
-        </a>
-      </section>
-
-      <section class="card" id="roadmap" style="margin-top: 18px">
-        <h2>Roadmap</h2>
-        <p>
-          The first pass is complete. These pages are next; each one extends the
-          existing export pipeline rather than adding a new one.
-        </p>
-        <div class="three-col">
-          <div>
-            <h3>Forward-pass x-ray</h3>
-            <p class="small muted">
-              Follow one image through the ViT: patch embeddings, token norms and
-              attention entropy at each block.
-            </p>
-          </div>
-          <div>
-            <h3>Attention explorer</h3>
-            <p class="small muted">
-              Where each head looks, and how the CLS token aggregates patch
-              information across layers.
-            </p>
-          </div>
-          <div>
-            <h3>Augmentation playground</h3>
-            <p class="small muted">
-              The view generator behind <span class="mono">L_pred</span>, with paired
-              and shuffled controls you can vary.
-            </p>
-          </div>
-        </div>
-        <p class="small muted" style="margin: 12px 0 0">
-          A run comparator and a guided tour of JEPA are also planned.
-        </p>
-      </section>
-
-      <section class="card" id="about" style="margin-top: 18px">
-        <h2>About the demos</h2>
-        <div class="three-col">
-          <div>
-            <h3>Real model outputs</h3>
-            <p class="small muted">
-              The CIFAR demos read a 2,000-image test subset exported from the
-              400-epoch run. CLS, <span class="mono">proj_head</span> and projector
-              vectors are the model's own; the checkpoint is a release asset, not a
-              committed file.
-            </p>
-          </div>
-          <div>
-            <h3>Static by design</h3>
-            <p class="small muted">
-              Every page is a classic script with no CDN, bundler or runtime server.
-              Open <span class="mono">index.html</span> from disk, or serve the folder
-              with <span class="mono">python3 -m http.server</span>.
-            </p>
-          </div>
-          <div>
-            <h3>Math you can check</h3>
-            <p class="small muted">
-              The JavaScript cores are tested against the PyTorch reference: SIGReg
-              quadrature, the loss terms, neighbour metrics and the toy gradients.
-              <a href="STARTING_GUIDE.md#5-run-the-tests">Run the tests</a>.
-            </p>
-          </div>
-        </div>
-        <div class="note" style="margin-top: 12px">
-          These pages are learning material, not benchmarks. The experiment log in
-          <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> remains the
-          source of truth for claims about the model.
-        </div>
-      </section>
-
-      <footer class="footer">
-        Part of the <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> project ·
-        Apache-2.0 · source on
-        <a href="https://github.com/iiEliJas/learn_jepa">GitHub</a> · background:
-        <a href="https://github.com/iiEliJas/fast_JEPA/blob/main/docs/experiments/002_cifar10_lejepa_analysis.md"
-          >the first CIFAR-10 analysis</a
-        >. New here? Read the <a href="STARTING_GUIDE.md">starting guide</a>.
-      </footer>
+/* sections */
+section{padding:36px 0}
+section>h2{font-size:1.7rem;margin-bottom:6px}
+.lede{color:var(--soft);max-width:38em;margin:0 0 22px}
+.chapters{max-width:42rem}
+.part-h{font:600 .95rem var(--mono);color:var(--soft);margin:40px 0 4px;padding-top:16px;border-top:1px solid var(--rule)}
+.part-h:first-child{margin-top:8px;border-top:0;padding-top:0}
+.chapter{position:relative;padding:20px 0 6px 56px;scroll-margin-top:16px}
+.chapter .n{position:absolute;left:0;top:26px;width:40px;text-align:right;font:600 .85rem var(--mono);color:var(--accent)}
+.chapter::before{content:"";position:absolute;left:46px;top:0;bottom:0;width:1px;background:var(--rule)}
+.chapter h3{font-size:1.3rem;margin-bottom:6px}
+.chapter p{margin:0 0 .9em}
+.go{display:inline-block;font:600 .92rem var(--serif);text-decoration:none;padding:.45em .95em;border:1.5px solid var(--accent);border-radius:3px;background:var(--sheet)}
+.go:hover{background:var(--accent);color:var(--paper)}
+.req{margin-left:10px;font:.78rem var(--mono);color:var(--soft)}
+.after{margin-top:16px;font-size:.96rem;color:var(--soft)}
+.pending{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.pending div{border:1.5px dashed var(--rule);border-radius:3px;padding:14px 16px}
+.pending h3{font-size:1.02rem}
+.pending p{margin:4px 0 0;font-size:.92rem;color:var(--soft);line-height:1.5}
+.about{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}
+.about h3{font-size:1.05rem;margin-bottom:4px}
+.about p{margin:0;font-size:.95rem;color:var(--soft);line-height:1.55}
+.note{margin-top:22px;padding:12px 16px;border-left:4px solid var(--mark);background:var(--sheet);font-size:.95rem}
+footer{padding:32px 0 56px;font-size:.9rem;color:var(--soft);border-top:1px solid var(--rule);margin-top:24px}
+@media (max-width:760px){.hero{grid-template-columns:1fr;padding-top:36px}}
+</style>
+</head>
+<body>
+<button class="theme" id="theme" type="button" aria-label="Colour theme">theme: auto</button>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>Learn LeJEPA by <span class="mark">playing with it</span>.</h1>
+      <p>Static, dependency-free demos that turn the equations and the training logs into things you can drag, click and inspect. Start with the objective, then look at where the trained CIFAR-10 model puts its embeddings.</p>
+      <a class="cta" href="#c1">Start with chapter 1</a>
     </div>
-  </body>
+    <figure class="fig">
+      <canvas id="cloud" role="img" aria-label="Animated cloud of 2-D embedding points. It spreads into a round Gaussian cloud, and collapses onto a line while the pointer is held down."></canvas>
+      <div class="readout">
+        <span>SIGReg <b id="state">on</b></span>
+        <span>effective rank <b id="rank">2.00</b> / 2</span>
+        <button class="toggle" id="btn" type="button" aria-pressed="false">Switch SIGReg off</button>
+      </div>
+      <figcaption>Fig. 1. Hold the mouse or your finger on the cloud to switch the regularizer off and watch the embedding collapse.</figcaption>
+    </figure>
+  </header>
+
+  <section id="experiments">
+  <div class="chapters">
+    <h2 class="part-h">Part 1. The objective</h2>
+    <div class="chapter" id="c1"><span class="n">1</span><h3>The loss, by hand</h3>
+      <p>LeJEPA trains an encoder with two terms: a prediction loss that pulls the views of one image together, and SIGReg, which keeps the whole batch of embeddings spread out. Edit a tiny tensor of embeddings and see both terms, and λ, respond.</p><a class="go" href="loss_calculator/index.html">Open the loss calculator</a><span class="req">No checkpoint needed</span></div>
+    <div class="chapter" id="c2"><span class="n">2</span><h3>SIGReg, visually</h3>
+      <p>SIGReg compares the embedding cloud with a standard Gaussian by looking at it through many random one-dimensional slices. Draw a cloud, project it, and watch the statistic and its gradient push points outward.</p><a class="go" href="sigreg_lab/index.html">Open SIGReg Lab</a><span class="req">No checkpoint needed</span></div>
+    <div class="chapter" id="c3"><span class="n">3</span><h3>Collapse, in front of you</h3>
+      <p>Without the regularizer, the easiest way to make views agree is to map everything to the same place. Train a tiny encoder in the browser, switch SIGReg off, and watch the effective rank fall while the prediction loss still improves.</p><a class="go" href="collapse_sim/index.html">Open the simulator</a><span class="req">No checkpoint needed</span></div>
+    <h2 class="part-h">Part 2. The trained model</h2>
+    <div class="chapter" id="c4"><span class="n">4</span><h3>The CIFAR embedding atlas</h3>
+      <p>A clickable 2-D map of 2,000 test images. Switch between CLS, head and projector spaces, compare raw and mean-centered features, and click any image to see its nearest neighbours.</p><a class="go" href="cifar_atlas/index.html">Open the atlas</a><span class="req">Uses CIFAR assets</span></div>
+    <div class="chapter" id="c5"><span class="n">5</span><h3>One image, four views</h3>
+      <p>The prediction term on a real example: four augmented views, their mean, and each view’s share of the loss, with paired and shuffled controls to compare against.</p><a class="go" href="per_image/index.html">Open the embedding card</a><span class="req">Uses CIFAR assets</span></div>
+    <div class="chapter" id="c6"><span class="n">6</span><h3>One image, three spaces</h3>
+      <p>Follow one test image through the ViT’s CLS token, the 512-d <span class="mono">proj_head</span> and the 16-d projector, and measure how much their neighbour lists agree.</p><a class="go" href="space_lens/index.html">Open the lens</a><span class="req">Uses CIFAR assets</span></div>
+    <div class="chapter" id="c7"><span class="n">7</span><h3>Projector diagnostics</h3>
+      <p>Sixteen marginal histograms, moments, the 16×16 correlation matrix and real-data SIGReg per slice. Resample the batch and the directions to see which structure survives.</p><a class="go" href="projector_diagnostics/index.html">Open diagnostics</a><span class="req">Uses CIFAR assets</span></div>
+  </div>
+</section>
+
+  <section id="roadmap">
+    <h2>Not run yet</h2>
+    <p class="lede">The first pass is complete. These pages are next, each extending the existing export pipeline.</p>
+    <div class="pending">
+      <div><h3>Forward-pass x-ray</h3><p>Follow one image through the ViT: patch embeddings, token norms and attention entropy per block.</p></div>
+      <div><h3>Attention explorer</h3><p>Where each head looks, and how the CLS token gathers patch information across layers.</p></div>
+      <div><h3>Augmentation playground</h3><p>The view generator behind <span class="mono">L_pred</span>, with paired and shuffled controls you can vary.</p></div>
+    </div>
+    <p class="after">A run comparator and a guided tour of JEPA are also planned.</p>
+  </section>
+
+  <section id="about">
+    <h2>About the demos</h2>
+    <div class="about">
+      <div><h3>Real model outputs</h3><p>The CIFAR demos read a 2,000-image test subset exported from the 400-epoch run. CLS, <span class="mono">proj_head</span> and projector vectors are the model’s own; the checkpoint is a release asset, not a committed file.</p></div>
+      <div><h3>Static by design</h3><p>Every page is a classic script with no CDN, bundler or runtime server. Open <span class="mono">index.html</span> from disk, or serve the folder with <span class="mono">python3 -m http.server</span>.</p></div>
+      <div><h3>Math you can check</h3><p>The JavaScript cores are tested against the PyTorch reference: SIGReg quadrature, the loss terms, neighbour metrics and the toy gradients. <a href="STARTING_GUIDE.md#5-run-the-tests">Run the tests</a>.</p></div>
+    </div>
+    <div class="note">These pages are learning material, not benchmarks. The experiment log in <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> remains the source of truth for claims about the model.</div>
+  </section>
+
+  <footer>
+    Part of the <a href="https://github.com/iiEliJas/fast_JEPA">fast_JEPA</a> project. Apache-2.0. Source on <a href="https://github.com/iiEliJas/learn_jepa">GitHub</a>. Background: <a href="https://github.com/iiEliJas/fast_JEPA/blob/main/docs/experiments/002_cifar10_lejepa_analysis.md">the first CIFAR-10 analysis</a>. New here? Read the <a href="STARTING_GUIDE.md">starting guide</a>.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var cv=document.getElementById('cloud'), ctx=cv.getContext('2d');
+  var stateEl=document.getElementById('state'), rankEl=document.getElementById('rank'), btn=document.getElementById('btn');
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var N=170, pts=[], seed=7;
+  function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647}
+  function gauss(){return Math.sqrt(-2*Math.log(rnd()+1e-9))*Math.cos(2*Math.PI*rnd())}
+  for(var i=0;i<N;i++)pts.push({gx:gauss(),gy:gauss(),ph:rnd()*6.28,x:0,y:0});
+  var s=1, target=1, held=false, W=0, last=0, t0=0;
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+  function resize(){var r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;W=r.width;cv.width=W*d;cv.height=W*d;ctx.setTransform(d,0,0,d,0,0)}
+  function setTarget(v){target=v;stateEl.textContent=v?'on':'off';btn.textContent=v?'Switch SIGReg off':'Switch SIGReg on';btn.setAttribute('aria-pressed',v?'false':'true');requestAnimationFrame(frame)}
+  cv.addEventListener('pointerdown',function(e){held=true;cv.setPointerCapture(e.pointerId);setTarget(0)});
+  function up(){if(held){held=false;setTarget(1)}}
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  btn.addEventListener('click',function(){setTarget(target?0:1)});
+  function frame(t){
+    var dt=Math.min(.05,(t-last)/1000||0);last=t;
+    s+= (target-s)*(reduce?1:Math.min(1,dt*3));
+    var R=W*.17, c=W/2, sx=0,sy=0,sxx=0,syy=0,sxy=0, ink=css('--ink'), acc=css('--accent'), rule=css('--rule');
+    ctx.clearRect(0,0,W,W);
+    ctx.strokeStyle=rule;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(c,12);ctx.lineTo(c,W-12);ctx.moveTo(12,c);ctx.lineTo(W-12,c);ctx.stroke();
+    ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(c,c,R*2,0,6.283);ctx.stroke();ctx.setLineDash([]);
+    for(var i=0;i<N;i++){
+      var p=pts[i], w=reduce?0:Math.sin(t/900+p.ph)*.06;
+      var ux=p.gx+w, uy=p.gy+w*1.3;
+      var lx=(ux+uy)/Math.SQRT2, ly=.04*(ux-uy)/Math.SQRT2;
+      var cx=(1-s)*(lx*Math.SQRT1_2-ly*Math.SQRT1_2)+s*ux;
+      var cy=(1-s)*(lx*Math.SQRT1_2+ly*Math.SQRT1_2)+s*uy;
+      p.x=cx*R;p.y=cy*R;
+      sx+=p.x;sy+=p.y;sxx+=p.x*p.x;syy+=p.y*p.y;sxy+=p.x*p.y;
+      ctx.fillStyle=i%9===0?acc:ink;ctx.globalAlpha=.8;
+      ctx.beginPath();ctx.arc(c+p.x,c-p.y,3,0,6.283);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    var mx=sx/N,my=sy/N,a=sxx/N-mx*mx,b=syy/N-my*my,d=sxy/N-mx*my;
+    var tr=a+b,det=a*b-d*d,disc=Math.sqrt(Math.max(0,tr*tr/4-det));
+    var l1=tr/2+disc,l2=Math.max(1e-9,tr/2-disc),q=l1+l2,p1=l1/q,p2=l2/q;
+    var er=Math.exp(-(p1*Math.log(p1)+p2*Math.log(p2)));
+    rankEl.textContent=er.toFixed(2);
+    if(!reduce||Math.abs(target-s)>.001)requestAnimationFrame(frame);
+  }
+  resize();addEventListener('resize',function(){resize();requestAnimationFrame(frame)});
+  if(matchMedia('(prefers-color-scheme: dark)').addEventListener)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){requestAnimationFrame(frame)});
+  requestAnimationFrame(frame);
+})();
+
+(function(){
+  var b=document.getElementById('theme'),root=document.documentElement,modes=['auto','light','dark'],m='auto';
+  try{m=localStorage.getItem('theme')||'auto'}catch(e){}
+  function apply(){if(m==='auto')root.removeAttribute('data-theme');else root.setAttribute('data-theme',m);b.textContent='theme: '+m}
+  b.addEventListener('click',function(){m=modes[(modes.indexOf(m)+1)%3];try{localStorage.setItem('theme',m)}catch(e){}apply();requestAnimationFrame(function(){window.dispatchEvent(new Event('resize'))})});
+  apply();
+})();
+</script>
+</body>
 </html>

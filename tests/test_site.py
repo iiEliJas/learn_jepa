@@ -61,7 +61,6 @@ def test_learning_pages_are_self_contained():
     for page in pages:
         text = page.read_text()
         assert not external.search(text), f"{page} loads an external resource"
-        assert "learning.css" in text
     for page in pages[1:]:
         assert "<script" in page.read_text()
 
