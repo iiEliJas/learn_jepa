@@ -10,7 +10,7 @@ inspect. There is no build step, no CDN and no runtime server.
 Open [`index.html`](index.html) in a browser and follow the suggested path:
 
 | Page | What it answers |
-|---|---|
+| --- | --- |
 | [`loss_calculator/index.html`](loss_calculator/index.html) | What exactly are `L_pred`, `L_SIGReg` and `lambda` computing? |
 | [`sigreg_lab/index.html`](sigreg_lab/index.html) | Why does the sliced Epps–Pulley statistic push a cloud toward a Gaussian? |
 | [`cifar_atlas/index.html`](cifar_atlas/index.html) | Where does the trained encoder put each test image, and which errors are semantic? |
@@ -50,7 +50,7 @@ The release is
 [`v0.1.0`](https://github.com/iiEliJas/learn_jepa/releases/tag/v0.1.0).
 
 | Asset | Size | SHA-256 |
-|---|---|---|
+| --- | --- | --- |
 | `cifar10_lejepa_400ep_model.pt` | 13.4 MB | `25e81591e9cf2757ccb86954352b1b3b3d03450e44ca88a2473d0f04f90c4d17` |
 | `SHA256SUMS` | — | checksum file for the asset above |
 
@@ -159,7 +159,6 @@ PyTorch-free Python checks on every push.
 index.html                  landing page / guided tour
 STARTING_GUIDE.md           this file
 CHANGELOG.md                release history
-learning_tools.md           roadmap and design notes
 .github/workflows/          CI and static-site deploy
 requirements-dev.txt        pytest for the Python checks
 assets/
