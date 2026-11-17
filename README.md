@@ -23,7 +23,7 @@ Either open the landing page directly:
 xdg-open index.html      # or your file manager
 ```
 
-or serve the repository (useful on a tablet or for relative-path edge cases):
+or serve the repo:
 
 ```bash
 python3 -m http.server 8000
@@ -32,23 +32,6 @@ python3 -m http.server 8000
 
 No build step, no CDN, no runtime server, no extra Python dependency. The pages
 use classic scripts so they work from `file://`.
-
-## Hosting
-
-The repository is already the site. GitHub Pages can serve it from the Actions
-tab with `.github/workflows/pages.yml`, which uploads the working tree as-is —
-there is nothing to compile. Enable Pages under **Settings → Pages** with
-**Source: GitHub Actions** first. Free Pages sites require a public repository;
-the workflow is manual so a private repository stays green until that is
-decided.
-
-## Releases
-
-Version history is in [`CHANGELOG.md`](CHANGELOG.md), and tagged builds are on
-the [releases page](https://github.com/iiEliJas/learn_jepa/releases). The trained
-CIFAR-10 model is a release asset rather than a committed file; download
-instructions are in the
-[starting guide](STARTING_GUIDE.md#3-download-the-cifar-model-optional).
 
 ## What exists
 
@@ -69,35 +52,6 @@ The public atlas ships a balanced 2,000-image test subset; the checkpoint and th
 CIFAR-10 data stay local and are gitignored. The trained model is published as a
 GitHub release asset instead of being committed. The full roadmap is in
 [`learning_tools.md`](learning_tools.md).
-
-## Math
-
-The JavaScript core mirrors the Python reference exactly:
-
-- `assets/sigreg_core.js`: one-sided quadrature on `[0, t_max]`, odd number of
-  knots, endpoint weights `dt`, interior `2*dt`, all multiplied by
-  `exp(-t^2/2)`. The statistic is `T_s = N * sum_t err(t) * weight(t)`,
-  averaged over slices. The analytic gradient is checked against central finite
-  differences in the Node tests.
-- `loss_calculator/loss_core.js`: `mu`, `L_pred` with
-  `mean_over_k` / `sum_over_k`, per-view or joint SIGReg, and the weighted
-  total. It uses the same core as the lab.
-- `assets/atlas_core.js`: decoding for the compact base64 tensors, centering,
-  cosine neighbours, pairwise cosine, neighbour overlap and voting, the
-  per-image prediction term and the shuffled control. The same formulas appear
-  in `pysrc/lejepa/analysis.py` and `pysrc/lejepa/loss.py`.
-- `assets/projector_core.js`: per-dimension moments, KS distance to `N(0,1)`,
-  the correlation matrix and deterministic batch sampling. The SIGReg values
-  themselves come from `assets/sigreg_core.js`.
-- `collapse_sim/collapse_core.js`: a 2→8→2 tanh encoder and predictor with
-  manual backprop, `L = L_pred + λ·mean_v SIGReg(z_v)`, and the participation
-  ratio used as the effective-rank diagnostic. Every gradient is checked
-  against central finite differences.
-
-The tests pin the JavaScript SIGReg value to a FP64 PyTorch value computed with
-[`pysrc/lejepa/sigreg.py`](https://github.com/iiEliJas/fast_JEPA/blob/main/pysrc/lejepa/sigreg.py)
-on the same points and directions. The formula reference is section 5.2 of the
-[fast_JEPA protocol](https://github.com/iiEliJas/fast_JEPA/blob/main/fast_JEPA_protocol.md).
 
 ## Tests
 
@@ -179,4 +133,4 @@ Apache-2.0.
 
 ## License
 
-Apache-2.0, matching fast_JEPA.
+Apache-2.0
