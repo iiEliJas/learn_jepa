@@ -3,7 +3,7 @@
 [![CI](https://github.com/iiEliJas/learn_jepa/actions/workflows/ci.yml/badge.svg)](https://github.com/iiEliJas/learn_jepa/actions/workflows/ci.yml)
 
 Interactive, dependency-free demos for understanding JEPA, LeJEPA, SIGReg and the
-CIFAR-10 representation.
+CIFAR-10 representation. Just visit [this link](https://iielijas.github.io/learn_jepa/) to see the pages.
 
 These pages are the learning layer for
 **[fast_JEPA](https://github.com/iiEliJas/fast_JEPA)**, a from-scratch C/CUDA
