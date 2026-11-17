@@ -42,6 +42,14 @@ there is nothing to compile. Enable Pages under **Settings → Pages** with
 the workflow is manual so a private repository stays green until that is
 decided.
 
+## Releases
+
+Version history is in [`CHANGELOG.md`](CHANGELOG.md), and tagged builds are on
+the [releases page](https://github.com/iiEliJas/learn_jepa/releases). The trained
+CIFAR-10 model is a release asset rather than a committed file; download
+instructions are in the
+[starting guide](STARTING_GUIDE.md#3-download-the-cifar-model-optional).
+
 ## What exists
 
 | Page | Status | To regenerate |

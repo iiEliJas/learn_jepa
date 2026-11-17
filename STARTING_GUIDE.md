@@ -158,6 +158,7 @@ PyTorch-free Python checks on every push.
 ```text
 index.html                  landing page / guided tour
 STARTING_GUIDE.md           this file
+CHANGELOG.md                release history
 learning_tools.md           roadmap and design notes
 .github/workflows/          CI and static-site deploy
 requirements-dev.txt        pytest for the Python checks

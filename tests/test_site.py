@@ -13,6 +13,7 @@ def test_learning_pages_and_assets_exist():
         ROOT / "index.html",
         ROOT / "README.md",
         ROOT / "STARTING_GUIDE.md",
+        ROOT / "CHANGELOG.md",
         ROOT / "assets" / "learning.css",
         ROOT / "assets" / "canvas.js",
         ROOT / "assets" / "sigreg_core.js",
