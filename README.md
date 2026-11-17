@@ -36,7 +36,7 @@ use classic scripts so they work from `file://`.
 ## What exists
 
 | Page | Status | To regenerate |
-|---|---|---|
+| --- | --- | --- |
 | `sigreg_lab/index.html` | available | nothing |
 | `loss_calculator/index.html` | available | nothing |
 | `cifar_atlas/index.html` | available | model + CIFAR-10 |
@@ -50,8 +50,7 @@ The atlas, per-image card, three-space lens and projector diagnostics run from
 the included assets. The collapse simulator trains a toy model on synthetic data.
 The public atlas ships a balanced 2,000-image test subset; the checkpoint and the
 CIFAR-10 data stay local and are gitignored. The trained model is published as a
-GitHub release asset instead of being committed. The full roadmap is in
-[`learning_tools.md`](learning_tools.md).
+GitHub release asset instead of being committed.
 
 ## Tests
 

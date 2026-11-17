@@ -1,14 +1,4 @@
 # Deploy the static demos to GitHub Pages.
-#
-# The pages need no build step, so the artifact is the repository itself.
-# This workflow is manual on purpose: Pages must first be enabled in
-# Settings -> Pages (source: GitHub Actions), and free Pages sites require a
-# public repository. Once the repository is public and Pages is enabled, add
-#
-#   push:
-#     branches: [main]
-#
-# to the `on:` block if you want every push to redeploy.
 
 name: Deploy static site
 

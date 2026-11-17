@@ -65,7 +65,9 @@ def test_atlas_export_contract(data):
     assert all(0 <= index < 10000 for index in data["indices"])
     assert len(set(data["indices"])) == n
     assert all(len(row) == 3 for row in data["top3"])
-    assert all(0.0 <= probability <= 1.0 for row in data["top3"] for _, probability in row)
+    assert all(
+        0.0 <= probability <= 1.0 for row in data["top3"] for _, probability in row
+    )
     assert meta["probe_accuracy"] == pytest.approx(
         sum(label == pred for label, pred in zip(data["labels"], data["preds"])) / n,
         abs=1e-4,
@@ -133,14 +135,18 @@ def test_atlas_export_matches_pytorch(data):
     check = json.loads(CHECK_PATH.read_text())
     assert check["checkpoint_sha256"] == data["meta"]["checkpoint_sha256"]
 
-    spec = importlib.util.spec_from_file_location("learning_generate", ROOT / "cifar_atlas" / "generate.py")
+    spec = importlib.util.spec_from_file_location(
+        "learning_generate", ROOT / "cifar_atlas" / "generate.py"
+    )
     generate = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(generate)
 
     device = torch.device("cpu")
     _, _, enc, proj, probe = generate.load_models(CHECKPOINT, device)
-    dataset = datasets.CIFAR10(root=str(DATA_ROOT), train=False, download=False, transform=None)
+    dataset = datasets.CIFAR10(
+        root=str(DATA_ROOT), train=False, download=False, transform=None
+    )
     eval_transform = generate.build_transform(32, train=False)
     view_transform = generate.build_transform(32, train=True)
 
@@ -157,9 +163,9 @@ def test_atlas_export_matches_pytorch(data):
             (sample["proj"], z[0], 2e-4),
             (sample["logits"], logits[0], 2e-3),
         ):
-            assert torch.allclose(torch.tensor(exported), actual, atol=tolerance, rtol=0), (
-                "exported value differs from a fresh PyTorch forward pass"
-            )
+            assert torch.allclose(
+                torch.tensor(exported), actual, atol=tolerance, rtol=0
+            ), "exported value differs from a fresh PyTorch forward pass"
 
         row = sample["subset_row"]
         assert data["indices"][row] == sample["test_index"]
@@ -180,13 +186,18 @@ def test_atlas_export_matches_pytorch(data):
             else:
                 values = decode_float32(space)
                 for dim in range(space["dim"]):
-                    assert abs(values[row * space["dim"] + dim] - float(actual[dim])) <= 2e-4
+                    assert (
+                        abs(values[row * space["dim"] + dim] - float(actual[dim]))
+                        <= 2e-4
+                    )
 
     view_values = decode_plain_float32(data["views"]["data"])
     for sample in check["view_samples"]:
         torch.manual_seed(sample["seed"])
         random.seed(sample["seed"])
-        views = torch.stack([view_transform(dataset[sample["test_index"]][0]) for _ in range(4)])
+        views = torch.stack(
+            [view_transform(dataset[sample["test_index"]][0]) for _ in range(4)]
+        )
         with torch.no_grad():
             feat = enc.vit(views)
             head = enc.proj_head(feat)
